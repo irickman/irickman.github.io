@@ -9,7 +9,7 @@ title: Contact Me
     <p class="intro">Thanks for reading! I'm using this blog to learn about data sets, data science, and data visualizations. </p>
     <p>I'd love to hear your thoughts and questions, so feel free to reach out!</p>
   </div>
-  <form action="http://formspree.io/irarickman@gmail.com" method="POST">
+  <form action="https://formspree.io/irarickman@gmail.com" method="POST">
     <label for="name">Name</label>
     <input type="text" id="name" name="name" class="full-width"><br>
     <label for="email">Email Address</label>
