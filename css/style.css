@@ -6,6 +6,7 @@
  * 2. Prevent adjustments of font size after orientation changes in
  *    IE on Windows Phone and in iOS.
  */
+/*@import "{{ site.theme }}"*/
 @import url(http://fonts.googleapis.com/css?family=Open+Sans:300,400,800);
 @import url(http://fonts.googleapis.com/css?family=PT+Serif:400,700,400italic,700italic);
 html {
@@ -461,7 +462,7 @@ blockquote {
 
 @media (min-width: 43.75em) {
   blockquote {
-    font-size: 1.5em;
+    font-size: 1em;
     line-height: 1.45833333; } }
 
 /***************
@@ -653,6 +654,8 @@ th {
 .highlight .nt {
   color: #729fcf; }
 
+.highlight .k, .highlight .s {font-size: 10pt }
+
 .highlight .cp, .highlight .gh, .highlight .gu, .highlight .na, .highlight .nf {
   color: #E9A94B; }
 
@@ -665,6 +668,7 @@ th {
 
 .highlight .nv, .highlight .vc, .highlight .vg, .highlight .vi {
   color: #fff; }
+
 
 /***************
 GLOBAL STYLES
@@ -866,7 +870,7 @@ POST STYLING
   margin: 3rem 0; }
   .post figure figcaption {
     text-align: center;
-    font-size: .9em;
+    font-size: .5em;
     font-style: italic;
     color: #5e5e5e; }
   .post figure img {

@@ -12,7 +12,7 @@ date : 2017-07-11
 To make my life easier (so I don't have to remember as much code), I set out to store my custom functions in one central location, making them easily available to use. Given that exploratory data analysis or EDA (figuring out what your data looks like) is the first thing a data scientist does with a new data set, I made performing EDA my first reusable custom function.
 
 <figure>
-  {% highlight ruby %}
+  {% highlight python %}
   def EDA(data):
       """This function performs EDA on an Pandas dataframe"""
       print 'The shape of the data is: ' + str(data.shape) + "\n"
