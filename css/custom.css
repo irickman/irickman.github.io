@@ -1,0 +1,6 @@
+@font-face {
+font-family: 'PremierLeague';
+font-style: normal;
+font-weight: normal;
+src: local('PremierLeague'), url('Barclays Premier League.woff') format('woff');
+}
