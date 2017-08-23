@@ -12,8 +12,8 @@ date : 2017-08-20
 <figure>
 <figcaption> Select an MLB team below to see which EPL teams it was paired with, based on the characteristics listed below. Some teams have multiple options, so choose one you like!<br/>Apologies to Dodgers fans, your team is so special, they didn't match with anyone! </figcaption>
 <iframe
-  style="border: 0px;"
-  src="https://public.tableau.com/views/PremierLeagueViz_demo/FindingaPremierLeagueTeam?:embed=y&:display_count=yes&publish=yes?:render=false"
+  style="border: 0px; font-family: 'PremierLeague';"
+  src="https://public.tableau.com/views/PremierLeagueViz_demo/FindingaPremierLeagueTeam?:embed=y&:display_count=yes&publish=yes"
   scrolling="no"
   width="2000px"
   height="1300px">
