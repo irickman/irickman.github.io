@@ -4,7 +4,7 @@ title: "Building a Premier League Clustering Model: Part II"
 category : clustering
 tagline: "Supporting tagline"
 tags : [viz, epl, soccer, premier league, clustering, data science]
-date : 2017-08-21
+date : 2017-08-22
 ---
 
 <p class="intro"><span class="dropcap">F</span>or the second post in my three part series on constructing an EPL team selection tool, I'll detail the modeling approach I used to cluster teams. When I originally set out to match MLB teams to Premier League teams, I decided to use unsupervised learning. Although I could have used a supervised learning technique to predict which EPL team matched each MLB team, I decided against that approach for reasons I'll dtail below. </p>

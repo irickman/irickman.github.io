@@ -4,7 +4,7 @@ title: "Building a Premier League Clustering Model: Part III"
 category : clustering
 tagline: "Supporting tagline"
 tags : [viz, epl, soccer, premier league, clustering, data science]
-date : 2017-08-21
+date : 2017-08-23
 ---
 
 <p class="intro"><span class="dropcap">I</span>n the final post in my three part series on constructing an EPL team selection tool, I'll detail the process used to create the visualization in Tableau and the stylistic choices I made to improve the user experience. Given that I have a background using Tableau, I knew it would be my go-to for displaying the results of my clustering analysis. Below I explain the creative process and the steps I took. </p>
