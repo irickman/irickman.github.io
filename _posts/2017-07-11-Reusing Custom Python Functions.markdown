@@ -26,6 +26,7 @@ To make my life easier (so I don't have to remember as much code), I set out to 
 </figure>
 
 ### Writing My EDA Function
+
 First, I wrote my code, as shown above, in my text editor. The function takes in a Pandas data frame, then gives me the:
 
 * Number of rows and columns
@@ -36,6 +37,7 @@ First, I wrote my code, as shown above, in my text editor. The function takes in
 * Summary Statistics on each column (count, mean, median, minimum, maximum and percentiles)
 
 ### Storing My EDA Function
+
 Next, I searched through my directory to find the location of my Python packages. After a bit of digging, I found a folder with the path **Users>myusername>Anaconda2>lib>Python 2.7>site-packages**. In the site-packages folder, I found some of the packages I frequently use, so I knew I was in the right place. Once I found the right folder, I named my text file as "myfunctions.py" and saved it to **Users>myusername>Anaconda2>lib>Python 2.7>site-packages**.
 
 <figure>
@@ -44,7 +46,9 @@ Next, I searched through my directory to find the location of my Python packages
 </figure>
 
 ### Using My EDA Function
+
 To use the file, I simply need to import "myfunctions" at the start of a script to access my EDA function. In the example above, I used the function to learn more about a data set containing all of Aaron Judge's home runs before the All-Star break in 2017. After running it, I can see that there are 30 rows, with data observed across 9 variables including data on the game, the situation, and the home run itself.
 
 ### Next Steps
+
 It's nice to be able to quickly and repeatedly perform EDA, but there will certainly be more custom functions I want to write and reuse in the future. Fortunately, by storing my custom functions in a central location, I can just add new ones to the "myfunctions.py" file. Once I save the file, then import it, I'll have access to any new functions I store there, making it quick and easy to reuse custom functions of any type.

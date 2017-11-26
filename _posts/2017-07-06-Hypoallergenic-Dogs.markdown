@@ -20,6 +20,7 @@ Although my parents already have one hypoallergenic dog, they didn't realize Bro
 </iframe>
 
 ### My Approach
+
 At the outset I wanted to create a tool to help prospective owners choose the right dog, based on their allergy tolerance. From experience I knew that certain dogs caused more allergic reactions than others, however [research][studylink] indicated otherwise. I quickly pivoted to a slightly simpler version to help dog lovers choose among "hypoallergenic" dogs.
 
 As a non-dog owner, I tried to consider the factors people care about when choosing a dog. I figured some of the key factors might include:
@@ -36,6 +37,7 @@ As luck would have it, I was able to find much of this data compiled by [Knowled
 Next, I did some research on hypoallergenic dogs, so I could merge them with my existing data. I found a pretty comprehensive list at [dogbreedslist.info][hypos] and created a very basic webscraper using BeautifulSoup to gather the list in Python. Then I cleaned the list in Python and merged it with my dog characteristic data, to create a set of 23 dogs (with complete data) to visualize in Tableau. After an enjoyable afternoon spent googling pictures of dogs and formatting my Tableau visualization, I was left with the visualization above.
 
 ### Next Steps
+
 While I hoped to include more dogs, with more characteristics and more analysis, I decided that an important first step in blogging, is just getting started. It's not yet perfect, but I hope to continue adding to this post in the future, incorporating additional breeds and eventually trying to model allergy inducement in dogs (despite what research suggests, I think otherwise). Thanks for reading, if nothing else, I hope you enjoy the pictures of dogs!
 
 

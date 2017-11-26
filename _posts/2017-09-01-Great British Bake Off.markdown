@@ -12,6 +12,7 @@ date : 2017-09-01
 In what can best be described as a perfectly British mix of pleasantries, baking, and cheeky humour, the show just seemed to subtly grab my attention, and before I knew it I was hooked. Since I started watching on Netflix, and the show had clearly been around a while, I wondered, was I late to the Bake Off?
 
 ### Popularity in the US
+
 As a good data science practitioner, I decided to answer the question with a chart. Using Google's [trend search][mainlink] I was able to see exactly when the show started to become popular in the US. While I consider myself "pop culture aware", I certainly was not an early adopter in this instance.
 
 <figure>

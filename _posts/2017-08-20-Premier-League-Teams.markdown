@@ -22,6 +22,7 @@ date : 2017-08-20
 
 
 ### Takeaways
+
 To perform this analysis, I collected data on the following characteristics of both EPL and MLB teams:
 
 * Weighted average of team record for the past 25 years
