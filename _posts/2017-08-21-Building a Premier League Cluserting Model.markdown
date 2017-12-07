@@ -97,4 +97,4 @@ The entire project took me the better part of two weeks to complete, with much o
 
 As mentioned previously, MLB is only the first league I plan to incorporate and I hope to update this post in the future with a new post on teams from another Big 4 American Sports League.
 
-[api]: http://www.football-data.org/documentation
+[api]: http://www.football-data.org/documentation 
