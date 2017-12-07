@@ -6,7 +6,7 @@ tags : [viz, google sheets, tableau, python, launchctl]
 date : 2017-12-07
 ---
 
-<p class="intro"><span class="dropcap">I</span>n a previous post, I introduced my Premier League Team Selection Tool, which used MLB team allegiance to suggest Premier League clubs based on a k-means clustering exercise. I was really happy with the final product, except for one glaring issue. I included a Premier League Table at the bottom of the viz, meant to be as close to live as possible. In reality, it required a manual update each game week, which defeated the purpose of it being "live".
+<p class="intro"><span class="dropcap">I</span>n a previous post, I introduced my Premier League Team Selection Tool, which used MLB team allegiance to suggest Premier League clubs based on a k-means clustering exercise. I was really happy with the final product, except for one glaring issue. I included a Premier League Table at the bottom of the viz, meant to be as close to live as possible. In reality, it required a manual update each game week, which defeated the purpose of it being "live".</p>
 
 As a result of Tableau Public's composition, each time I wanted to update the league table, I'd have to sign in, update the workbook, then reupload it to Tableau Public. Given that my interest in coding was spurred by a desire to eliminate my repeatable tasks, I figured this was just another task to automate. My solution ended up being three parts: Finding a Data Source, Getting Tableau Public to Refresh Automatically, and Scheduling it to Update Weekly.
 
