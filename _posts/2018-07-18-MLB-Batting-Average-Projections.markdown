@@ -4,7 +4,7 @@ title: "MLB Batting Average Projection Tool"
 category : viz
 tagline: "Supporting tagline"
 tags : [viz, baseball, tableau, google sheets, python, statcast]
-date : 2018-07-06
+date : 2018-07-18
 ---
 
 <p class="intro"><span class="dropcap">A</span>round this time each Major League Baseball season, games stop for the All-Star break and players get a chance to rest and reflect on the first half of their season. In some cases it can be a chance to reset following a poor first half, while for others it's a chance to double down and continue stroking. For every hot start that cools in the second half (Ryan Zimmerman 2017) there's a cool start that heats up (Kevin Kiermaier 2017).</p>
