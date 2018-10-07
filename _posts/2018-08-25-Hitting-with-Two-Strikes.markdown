@@ -35,7 +35,7 @@ While I was certainly surprised to see any players with a higher average with tw
 </figure>
 
 
-In the scatterplot above, there appears to be a relationship between higher numnbers of two strike counts and lower performance in two strike counts relative to all other counts. Since this trend may just be picking up strikeouts, I decided to instead look at how hitters perform when making contact in both types of counts.
+In the scatterplot above, there appears to be a relationship between higher numbers of two strike counts and lower performance in two strike counts relative to all other counts. Since this trend may just be picking up strikeouts, I decided to instead look at how hitters perform when making contact in both types of counts.
 
 ### Are there any hitters with better hitting outcomes with two strikes?
 

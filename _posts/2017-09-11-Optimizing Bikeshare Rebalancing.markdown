@@ -23,7 +23,7 @@ A key aspect of determining which stations to prioritize for rebalancing is unde
 
 <figure>
 <img src="{{ '/assets/img/Example Bikes.png' | prepend: site.baseurl }}" alt="">
-<figcaption> The scenario on the left displays 5 stations with bikes vs. 4 stations without bikes and 1 without bikes on the right. </figcaption>
+<figcaption> The scenario on the left displays 5 stations with bikes vs. 4 stations with bikes and 1 without bikes on the right. </figcaption>
 </figure>
 
 Using the logic above, I set out to identify the stations that have differences in demand for bikes for when they're empty and not empty as **measured by the average number of bikes leaving the neighboring stations.**
