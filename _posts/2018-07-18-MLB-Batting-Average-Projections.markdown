@@ -26,7 +26,7 @@ Once I had the data in Google Sheets, I created a Tableau Public visualization c
 
 <iframe
   style="border: 0px;"
-  src="https://public.tableau.com/views/MLBBattingAverageProjectionTool/PlayerProjectionTool?:embed=y&:display_count=yes&publish=yes&:origin=viz_share_link"
+  src="https://public.tableau.com/views/MLBBattingAverageProjectionTool/PlayerProjectionTool?:embed=y&:showVizHome=no"
   scrolling="no"
   width="1000px"
   height="1000px">

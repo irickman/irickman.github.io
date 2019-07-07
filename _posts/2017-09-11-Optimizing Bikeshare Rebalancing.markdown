@@ -65,7 +65,7 @@ Based on the results of my analysis, 87 of the 229 stations seemed to see an upt
 <figure>
 <figcaption> The visualization below shows bikeshare stations that should be prioritized for rebalancing </figcaption>
 <iframe
-  src="https://public.tableau.com/views/topublic/BikeshareExplorer?:embed=y&:display_count=yes"
+  src="https://public.tableau.com/views/topublic/BikeshareExplorer?:embed=y&:showVizHome=no"
   scrolling="no"
   width="2000px"
   height="1300px">

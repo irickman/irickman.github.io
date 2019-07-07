@@ -16,7 +16,7 @@ For my capstone, I looked at the bikeshare stations that have differences in dem
 <figure>
 <figcaption> The visualization below shows bikeshare stations that should be prioritized for rebalancing </figcaption>
 <iframe
-  src="https://public.tableau.com/views/topublic/BikeshareExplorer?:embed=y&:display_count=yes"
+  src="https://public.tableau.com/views/topublic/BikeshareExplorer?:embed=y&:showVizHome=no"
   scrolling="no"
   width="2000px"
   height="1300px">
