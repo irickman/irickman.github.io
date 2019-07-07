@@ -13,7 +13,7 @@ Although my parents already have one hypoallergenic dog, they didn't realize Bro
 
 <iframe
   style="border: 0px;"
-  src="https://public.tableau.com/views/HypoallergenicDogs/HypoallergenicDogs?:embed=y&:showVizHome=no"
+  src="https://public.tableau.com/shared/5HCGK5JBZ?:embed=y&:showVizHome=no"
   scrolling="no"
   width="1000px"
   height="1000px">
