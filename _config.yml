@@ -1,5 +1,5 @@
 
-title: Data - A Science
+title: Ira's Data Site
 description: Posts on data sets, data science, and data viz.
 
 url: http://irarickman.com
@@ -9,7 +9,7 @@ permalink: blog/:title/
 
 markdown: kramdown
 highlighter: rouge
-gems: [jekyll-paginate]
+plugins: [jekyll-paginate]
 paginate: 5
 
 navigation:
