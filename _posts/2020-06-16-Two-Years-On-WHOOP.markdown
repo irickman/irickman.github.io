@@ -10,11 +10,12 @@ date : 2020-06-16
 
 <iframe
   style="border: 0px;"
-  src="https://public.tableau.com/views/TwoYearsonWHOOP/Main?:display_count=y&:origin=viz_share_link"
-  scrolling="no"
+  src="https://public.tableau.com/views/TwoYearsonWHOOP/Main?:embed=yes&:display_count=yes&:showVizHome=no"
+  scrolling="yes"
   width="1440px"
-  height="600px">
+  height="1000px">
 </iframe>
+
 
 ## What is WHOOP?
 [WHOOP][whooplink] was founded in 2011 by Will Ahmed, a former squash player at Harvard who constantly felt overtrained. He wanted more information about how and why his body performed well one day and poorly the next, so he built WHOOP alongside his co-founders. A WHOOP membership gets you a watch-sized wristband that monitors your body as long as you wear it. The wristband syncs with their app via bluetooth and provides advanced analysis on [strain][strainlink], [recovery][recoverylink], and [sleep][sleeplink]. The app shows you real-time data on things like heart rate and activity so you can keep track of how much stress you've put on your body over the course of your day. Each morning, the WHOOP app analyzes your sleep to generate a 0%-100% recovery score along with detailed sleep analysis. Based on your recovery score, WHOOP recommends a daily strain target to prevent over-training and keep your body fresh.
