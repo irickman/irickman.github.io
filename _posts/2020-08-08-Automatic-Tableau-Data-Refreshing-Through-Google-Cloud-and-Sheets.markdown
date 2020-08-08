@@ -3,7 +3,7 @@ layout: post
 title: "Automatic Tableau Data Refreshing Through Google Cloud and Sheets"
 category : viz
 tags : [python, google cloud, cron, data, tableau]
-date : 2020-08-02
+date : 2020-08-08
 ---
 <p class="intro"><span class="dropcap">T</span>his post builds on my previous post on Auto Refreshing Tableau Public by introducing Google Cloud Compute and Google Cloud Scheduler. In my previous post, I explained how to connect a Tableau Public workbook to Google Sheets to take advantage of the daily Tableau Public-Google Sheet refresh. I described how to schedule a launch daemon locally to update the data contained within the Google Sheet, thereby refreshing the data in the connected Tableau Public workbook. While this setup works well for relatively infrequent refresh cycles, it does not work well for data that needs to be updated daily (or more frequently). The setup detailed below solves for this problem to create a truly automated data refresh procedure. </p>
 
