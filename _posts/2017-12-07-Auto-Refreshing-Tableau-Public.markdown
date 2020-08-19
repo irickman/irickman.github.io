@@ -6,8 +6,8 @@ tags : [viz, google cloud, tableau, python, launchctl]
 date : 2017-12-07
 ---
 
-## Updated Post
-**I've put together an update to this post that leverages Google Cloud Compute, Google Cloud Scheduler, and cron to truly automate this process**. While the process below works well if you keep your computer on for each scheduled launch daemon, it doesn't work for well data that needs to be refreshed more regularly or during off-peak hours. The updated approach does a better job handling these situations and can be found [here][updatelink].
+### Updated Post
+**I've put together an update to this post that leverages Google Cloud Compute, Google Cloud Scheduler, and cron to truly automate this process**. While the process below works well if you keep your computer on for each scheduled launch daemon, it doesn't work well for data that needs to be refreshed more regularly or during off-peak hours. The updated approach does a better job handling these situations and can be found [here][updatelink].
 
 <p class="intro"><span class="dropcap">I</span>n a previous post, I introduced my Premier League Team Selection Tool, which used MLB team allegiance to suggest Premier League clubs based on a k-means clustering exercise. I was really happy with the final product, except for one glaring issue. I included a Premier League Table at the bottom of the viz, meant to be as close to live as possible. In reality, it required a manual update each game week, which defeated the purpose of it being "live".</p>
 
