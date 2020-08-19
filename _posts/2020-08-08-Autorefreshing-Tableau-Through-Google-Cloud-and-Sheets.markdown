@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Autorefreshing Tableau Through Google Cloud and Sheets"
+title: "Auto Refreshing Tableau Through Google Cloud and Sheets"
 category : viz
 tags : [python, google cloud, cron, data, tableau]
 date : 2020-08-08
