@@ -1,21 +1,13 @@
----
-layout: default
-title: Contact Me
----
-
-<div id="contact">
+I"{<div id="contact">
   <h1 class="pageTitle">Contact Me</h1>
   <div class="contactContent">
     <p class="intro">Thanks for reading! I'm using this blog to learn about data sets, data science, and data visualizations. </p>
     <p>I'd love to hear your thoughts and questions, so feel free to reach out!</p>
   </div>
-  <form
-  action="https://formspree.io/f/mvodokvq"
-  method="POST"
->
+  <form action="https://formspree.io/f/mvodokvq" method="POST">
   <label>
     Your email:
-    <input type="email" name="_replyto">
+    <input type="email" name="_replyto" />
   </label>
   <label>
     Your message:
@@ -27,3 +19,4 @@ title: Contact Me
   <button type="submit">Send</button>
 </form>
 </div>
+:ET
