@@ -1,0 +1,4 @@
+I"[<h3 id="updated-post">Updated Post</h3>
+<p><strong>I’ve put together an update to this post that leverages Google Cloud Compute, Google Cloud Scheduler, and cron to truly automate this process</strong>. While the process below works well if you keep your computer on for each scheduled launch daemon, it doesn’t work well for data that needs to be refreshed more regularly or during off-peak hours. The updated approach does a better job handling these situations and can be found <a href="http://www.irarickman.com/Automatic-Tableau-Data-Refreshing-Through-Google-Cloud-and-Sheets/">here</a>.</p>
+
+:ET
