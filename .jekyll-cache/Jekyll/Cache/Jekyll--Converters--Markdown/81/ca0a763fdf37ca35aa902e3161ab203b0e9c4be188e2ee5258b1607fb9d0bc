@@ -1,9 +1,4 @@
----
-layout: default
-title: Contact Me
----
-
-<div id="contact">
+I"Ú<div id="contact">
   <h1 class="pageTitle">Contact Me</h1>
   <div class="contactContent">
     <p class="intro">Thanks for reading! I'm using this blog to learn about data sets, data science, and data visualizations. </p>
@@ -12,13 +7,14 @@ title: Contact Me
   <form id="mvodokvq" name="my-site" accept-charset="utf-8" action="https://formspree.io/f/mvodokvq" method="post">
   <fieldset id="fs-frm-inputs">
     <label for="full-name">Full Name</label>
-    <input type="text" name="name" id="full-name" placeholder="First and Last" required="">
+    <input type="text" name="name" id="full-name" placeholder="First and Last" required="" />
     <label for="email-address">Email Address</label>
-    <input type="email" name="_replyto" id="email-address" placeholder="email@domain.tld" required="">
+    <input type="email" name="_replyto" id="email-address" placeholder="email@domain.tld" required="" />
     <label for="message">Message</label>
     <textarea rows="5" name="message" id="message" placeholder="Aenean lacinia bibendum nulla sed consectetur. Vivamus sagittis lacus vel augue laoreet rutrum faucibus dolor auctor. Donec ullamcorper nulla non metus auctor fringilla nullam quis risus." required=""></textarea>
-    <input type="hidden" name="_subject" id="email-subject" value="Contact Form Submission">
+    <input type="hidden" name="_subject" id="email-subject" value="Contact Form Submission" />
   </fieldset>
-  <input type="submit" value="Submit">
+  <input type="submit" value="Submit" />
 </form>
 </div>
+:ET
