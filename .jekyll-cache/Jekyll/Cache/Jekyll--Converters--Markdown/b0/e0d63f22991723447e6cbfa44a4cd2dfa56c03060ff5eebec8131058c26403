@@ -1,0 +1,57 @@
+I"� <p class="intro"><span class="dropcap">A</span>bout a month ago, Juan Soto was up to bat with a two strike count, in the first inning of a Washington Nationals game. While I watched on TV, the color commentator, F.P. Santangelo, said that he thought Juan Soto was actually a better hitter with two strikes. As a fan of the game and a fan of data analysis, I respectfully disagreed. I looked up his numbers and saw that with two strikes, Soto was hitting .177, while hitting .301 overall. Clearly, he's a better hitter without two strikes, so I tweeted at Santangelo to share the news. </p>
+
+<p>Later in the game, Soto hit a home run on a two strike pitch and <a href="https://www.mlb.com/video/sotos-2-run-jack/c-2289044883">Santangelo used this as vindication</a> (40 seconds in) against all the people on Twitter who suggested he was wrong. A quick search revealed only one other person tweeted at him on the subject, so it appears he saw my tweet. He continued on to explain that actually, Soto hits the ball very hard with two strikes, which is something that doesn’t always show up in the stats. I was surprised to hear this explanation, given it that it <a href="http://m.mlb.com/glossary/statcast/exit-velocity">does</a> and is talked about pretty frequently in baseball nowadays (though it appears F.P. <a href="https://twitter.com/FightinHydrant/status/1009644477814853632">still does not know what it is</a>).</p>
+
+<p>So I <a href="https://twitter.com/IraRickman/status/1020728572951003136">tweeted</a> at him again to further demonstrate that based on exit velocity, Soto actually averaged 87.5 mph with two strikes vs. 90.2 mph without. Using the median though, it was a more similar story (90 vs 90.6), but the histogram made it clear that Soto really was not hitting the ball harder with two strikes. He might have been hitting it as well or only slightly worse, but it was certainly not better. When factoring in his .177 average with two strikes, it should be even clearer that <strong>Juan Soto is not a better hitter with two strikes</strong>.</p>
+
+<figure>
+<figcaption> Juan Soto's exit velocity with two strikes is not better than without two strikes </figcaption>
+<img src="/assets/img/soto.png" alt="" />
+</figure>
+
+<h3 id="are-there-any-hitters-who-hit-better-with-two-strikes">Are there any hitters who hit better with two strikes?</h3>
+
+<p>While it might not be the case with Juan Soto, I wondered - Are there any hitters in the statcast era (statcast data became available in 2015) who have been better with two strikes than without? To answer this question, I downloaded data from <a href="https://baseballsavant.mlb.com/statcast_search">statcast</a>, using the <a href="https://github.com/jldbc/pybaseball/blob/master/docs/playerid_reverse_lookup.md">pybaseball</a> package on python. Then, I split each player’s stats into player-seasons, since players are different from one season to the next, and limited my analysis to hitters with more than 370 plate appearances (although batting average does not stabilize until ~900 PAs, 370 looked like a good spot in this <a href="https://www.fangraphs.com/blogs/a-long-needed-update-on-reliability/">analysis</a> and launch speed seemed pretty reliable at much lower levels). When looking at batting average (hits/at bats), 2 player-seasons out of 1,056 in the analysis had a higher average with two strikes than without.</p>
+
+<figure>
+<figcaption> Only Jose Iglesias in 2015 and Andrelton Simmons this season have higher averages with two strikes than without </figcaption>
+<img src="/assets/img/Average Table.png" alt="" />
+</figure>
+
+<p>While I was certainly surprised to see any players with a higher average with two strikes than without, I also noticed that the players in the top 20 seemed to have a lower percentage of two strike counts relative to the bottom 20. Intuitively, this makes sense, since players can’t strike out when batting without two strikes, but it does indicate a potential problem with batting average as a measurement of two strike hitting ability. When combined with its notorious dependence on batted ball luck, batting average’s utility as a metric is called into question. Despite its disadvantages though, I still wanted to get a better sense for the robustness of the trend before trying another metric, so I plotted percentage of two strike counts against difference in average.</p>
+
+<figure>
+<figcaption> It does seem that hitters with who face more two strike counts tend to be worse with two strikes </figcaption>
+<img src="/assets/img/Scatter 1.png" alt="" />
+</figure>
+
+<p>In the scatterplot above, there appears to be a relationship between higher numbers of two strike counts and lower performance in two strike counts relative to all other counts. Since this trend may just be picking up strikeouts, I decided to instead look at how hitters perform when making contact in both types of counts.</p>
+
+<h3 id="are-there-any-hitters-with-better-hitting-outcomes-with-two-strikes">Are there any hitters with better hitting outcomes with two strikes?</h3>
+
+<p>To deemphasize the influence of strikeouts, I looked at launch speed (exit velocity) and <a href="http://m.mlb.com/glossary/statcast/expected-woba">expected weighted on base average</a> (essentially an unbiased look at the expected value generated by a ball put in play, factoring in its direction, launch angle, and launch speed). Although this shift does allow a more objective analysis of how a player is hitting the ball, it suffers from the opposite problem of average. A hitter who strikes out 9 times out of 10 with two strikes, but hits a home run on the 10th time isn’t necessarily a better hitter with two strikes. Still, it’s an interesting metric for evaluating hitter performance. For the sake of comparison, below is a listing of the top 20 and bottom 20 hitters by differences in launch speed and expected weighted on base average.</p>
+
+<figure>
+<figcaption> There are players who have hit the ball harder with two strikes than without </figcaption>
+<img src="/assets/img/Launch Speed Table.png" alt="" />
+</figure>
+
+<figure>
+<figcaption> There are players who have hit for a higher xWOBA with two strikes than without </figcaption>
+<img src="/assets/img/xWOBA Table.png" alt="" />
+</figure>
+
+<p>The first thing that jumps out is the number of hitters who do seem to hit the ball harder and have higher expected outcomes with two strikes relative to other counts. Overall 258 players had higher launch speeds with two strikes and 239 had higher xWOBAs. While that’s only 24% and 23% respectively, it’s still very interesting that some players do seem to hit the ball harder and more valuably with two strikes. However, these metrics might be measuring the same thing, since harder hit balls, <a href="https://fivethirtyeight.com/features/the-new-science-of-hitting/">in general</a>, lead to higher expected run values (which is a component of what xwoba measures). With that in mind, I want to look a bit further into xWOBA, because of its more comprehensive measurement approach.</p>
+
+<p>To continue the analysis, I looked to see if players with more two strike counts had more negative differences xWOBA. According to the scatter plots below, it doesn’t seem as though it makes an impact.</p>
+
+<figure>
+<figcaption> There does not appear to be a relationship between the percentage of two strike counts and launch speed or xWOBA</figcaption>
+<img src="/assets/img/Scatter 2.png" alt="" />
+</figure>
+
+<h3 id="conclusion">Conclusion</h3>
+
+<p>While I initially felt pretty confident that a hitter couldn’t be better with two strikes than without, as much as it pains me to say it, it seems like it might be possible. However, as is always the case with baseball analysis, it can be very difficult to disentangle luck from true talent. It’s wholly possible that a hitter prefers to work counts and thus ends up with two strikes more often, giving them more comfort hitting in those counts. A hitter might also change their approach in two strike counts (as was suggested about Juan Soto), thus improving their ability to hit in those counts. It could even be as simple as hitters feeling more inclined to swing at potential strikes when in two strike counts, since the cost of a not swinging is greater. All in all though, it’s a really interesting question to look at and one I plan to keep thinking about.</p>
+
+:ET

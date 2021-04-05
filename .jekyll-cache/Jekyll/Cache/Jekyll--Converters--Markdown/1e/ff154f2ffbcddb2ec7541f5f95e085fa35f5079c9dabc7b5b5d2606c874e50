@@ -1,0 +1,49 @@
+I"�<p class="intro"><span class="dropcap">S</span>imilar to many new Python coders, I've found myself repeating many of the same functions and operations. Since I'm not too keen on constantly copying and pasting the same code, I decided to try to streamline the process. </p>
+
+<p>To make my life easier (so I don’t have to remember as much code), I set out to store my custom functions in one central location, making them easily available to use. Given that exploratory data analysis or EDA (figuring out what your data looks like) is the first thing a data scientist does with a new data set, I made performing EDA my first reusable custom function.</p>
+
+<figure>
+  
+<figure class="highlight"><pre><code class="language-python" data-lang="python">  <span class="k">def</span> <span class="nf">EDA</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+      <span class="s">"""This function performs EDA on an Pandas dataframe"""</span>
+      <span class="k">print</span> <span class="s">'The shape of the data is: '</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">data</span><span class="p">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">+</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span>
+      <span class="k">print</span> <span class="s">'The data types are listed below: </span><span class="se">\n</span><span class="s">'</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">data</span><span class="p">.</span><span class="n">dtypes</span><span class="p">)</span> <span class="o">+</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span>
+      <span class="k">print</span> <span class="s">'Here are any missing values: </span><span class="se">\n</span><span class="s">'</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">data</span><span class="p">.</span><span class="n">isnull</span><span class="p">().</span><span class="nb">sum</span><span class="p">())</span>
+      <span class="k">print</span> <span class="s">'There are: '</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">data</span><span class="p">.</span><span class="n">duplicated</span><span class="p">().</span><span class="nb">sum</span><span class="p">())</span> <span class="o">+</span> <span class="s">' duplicated rows'</span>
+      <span class="k">print</span> <span class="s">'Here are the first 5 lines: </span><span class="se">\n</span><span class="s">'</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">data</span><span class="p">.</span><span class="n">head</span><span class="p">())</span> <span class="o">+</span> <span class="s">'</span><span class="se">\n</span><span class="s">'</span>
+      <span class="k">print</span> <span class="s">'The description of the data is listed here: </span><span class="se">\n</span><span class="s">'</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">data</span><span class="p">.</span><span class="n">describe</span><span class="p">(</span><span class="n">include</span><span class="o">=</span><span class="s">'all'</span><span class="p">))</span> <span class="o">+</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span>
+  </code></pre></figure>
+
+  <figcaption> Here's a snippet of my EDA function </figcaption>
+</figure>
+
+<h3 id="writing-my-eda-function">Writing My EDA Function</h3>
+
+<p>First, I wrote my code, as shown above, in my text editor. The function takes in a Pandas data frame, then gives me the:</p>
+
+<ul>
+  <li>Number of rows and columns</li>
+  <li>Types of data in each column</li>
+  <li>Number of missing values</li>
+  <li>Number of duplicated rows</li>
+  <li>Print out of the first five rows</li>
+  <li>Summary Statistics on each column (count, mean, median, minimum, maximum and percentiles)</li>
+</ul>
+
+<h3 id="storing-my-eda-function">Storing My EDA Function</h3>
+
+<p>Next, I searched through my directory to find the location of my Python packages. After a bit of digging, I found a folder with the path <strong>Users&gt;myusername&gt;Anaconda2&gt;lib&gt;Python 2.7&gt;site-packages</strong>. In the site-packages folder, I found some of the packages I frequently use, so I knew I was in the right place. Once I found the right folder, I named my text file as “myfunctions.py” and saved it to <strong>Users&gt;myusername&gt;Anaconda2&gt;lib&gt;Python 2.7&gt;site-packages</strong>.</p>
+
+<figure>
+	<img src="/assets/img/Aaron Judge.png" alt="" />
+	<figcaption>Peforming EDA on Aaron Judge's 2017 Home Runs</figcaption>
+</figure>
+
+<h3 id="using-my-eda-function">Using My EDA Function</h3>
+
+<p>To use the file, I simply need to import “myfunctions” at the start of a script to access my EDA function. In the example above, I used the function to learn more about a data set containing all of Aaron Judge’s home runs before the All-Star break in 2017. After running it, I can see that there are 30 rows, with data observed across 9 variables including data on the game, the situation, and the home run itself.</p>
+
+<h3 id="next-steps">Next Steps</h3>
+
+<p>It’s nice to be able to quickly and repeatedly perform EDA, but there will certainly be more custom functions I want to write and reuse in the future. Fortunately, by storing my custom functions in a central location, I can just add new ones to the “myfunctions.py” file. Once I save the file, then import it, I’ll have access to any new functions I store there, making it quick and easy to reuse custom functions of any type.</p>
+:ET
