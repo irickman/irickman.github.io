@@ -24,9 +24,9 @@ The result of my updated workflow is a Tableau Dashboard that allows users to pr
 
 [previouslink]:https://www.irarickman.com/blog/Autorefreshing-Tableau-Through-Google-Cloud-and-Sheets/
 [githublink]:https://github.com/irickman/mlbprojections
-[actionslink]:https://docs.github.com/en/actions/learn-github-actions/understanding-github-actions
+[actionlink]:https://docs.github.com/en/actions/learn-github-actions/understanding-github-actions
 [secretlink]:https://docs.github.com/en/actions/security-guides/encrypted-secrets
 [tutoriallink]:https://canovasjm.netlify.app/2020/11/29/github-actions-run-a-python-script-on-schedule-and-commit-changes/
 [jsonlink]:https://github.com/marketplace/actions/create-json
 [pygsh]:https://pygsheets.readthedocs.io/en/stable/authorization.html#service-account
-[mlblink]:https://public.tableau.com/views/MLBBattingAverageProjectionTool/PlayerProjectionTool?:language=en-US&:display_count=n&:origin=viz_share_link
+[mlblink]:https://public.tableau.com/app/profile/ira.rickman/viz/MLBBattingAverageProjectionTool/PlayerProjectionTool
