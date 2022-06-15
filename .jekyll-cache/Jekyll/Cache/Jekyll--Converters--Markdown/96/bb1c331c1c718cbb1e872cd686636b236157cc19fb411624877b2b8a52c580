@@ -1,0 +1,2 @@
+I"ê<p class="intro"><span class="dropcap">I</span> have been interested in moving one of my existing data pipelines from Google Cloud to Github Actions for a while now, but my recent bout with COVID finally provided me some downtime to get it done. In this post, I walk through the process I used to set up a recurring workflow using Github Actions, run a script, and authenticate to Google Sheets.</p>
+:ET
