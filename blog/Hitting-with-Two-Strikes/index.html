@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<!--[if lt IE 7]><html class="no-js lt-ie9 lt-ie8 lt-ie7"><![endif]-->
+<!--[if IE 7]><html class="no-js lt-ie9 lt-ie8" <![endif]-->
+<!--[if IE 8]><html class="no-js lt-ie9" <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js"> <!--<![endif]-->
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <title>Hitting with Two Strikes</title>
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="/assets/img/favicon.ico" />
+
+    <!-- Come and get me RSS readers -->
+    <link rel="alternate" type="application/rss+xml" title="Ira's Data Site" href="http://irarickman.com/feed.xml" />
+
+    <!-- Stylesheet -->
+    <link rel="stylesheet" href="/assets/css/style.css">
+
+    <!--[if IE 8]><link rel="stylesheet" href="/assets/css/ie.css"><![endif]-->
+    <link rel="canonical" href="http://irarickman.com/blog/Hitting-with-Two-Strikes/">
+
+    <!-- Modernizr -->
+    <script src="/assets/js/modernizr.custom.15390.js" type="text/javascript"></script>
+
+     <!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-NED541SQ8N"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-NED541SQ8N');
+</script> 
+</head>
+
+
+<body>
+
+    <div class="header">
+     <div class="container">
+         <h1 class="logo"><a href="/">Ira's Data Site</a></h1>
+         <nav class="nav-collapse">
+             <ul class="noList">
+                 
+                 <li class="element first  ">
+                     <a href="/index.html">Home</a>
+                 </li>
+                 
+                 <li class="element   ">
+                     <a href="/about">About</a>
+                 </li>
+                 
+                 <li class="element   last">
+                     <a href="/contact">Contact</a>
+                 </li>
+                 
+                 <li> <a href="https://github.com/irickman" target="_blank">GitHub</a></li>
+             </ul>
+         </nav>
+     </div>
+ </div><!-- end .header -->
+
+
+   <div class="content">
+      <div class="container">
+         <div class="post">
+  
+  <h1 class="postTitle">Hitting with Two Strikes</h1>
+  <p class="meta">August 25, 2018 | <span class="time">7</span> Minute Read</p>
+  
+  <p class="intro"><span class="dropcap">A</span>bout a month ago, Juan Soto was up to bat with a two strike count, in the first inning of a Washington Nationals game. While I watched on TV, the color commentator, F.P. Santangelo, said that he thought Juan Soto was actually a better hitter with two strikes. As a fan of the game and a fan of data analysis, I respectfully disagreed. I looked up his numbers and saw that with two strikes, Soto was hitting .177, while hitting .301 overall. Clearly, he's a better hitter without two strikes, so I tweeted at Santangelo to share the news. </p>
+
+<p>Later in the game, Soto hit a home run on a two strike pitch and <a href="https://www.mlb.com/video/sotos-2-run-jack/c-2289044883">Santangelo used this as vindication</a> (40 seconds in) against all the people on Twitter who suggested he was wrong. A quick search revealed only one other person tweeted at him on the subject, so it appears he saw my tweet. He continued on to explain that actually, Soto hits the ball very hard with two strikes, which is something that doesn’t always show up in the stats. I was surprised to hear this explanation, given it that it <a href="http://m.mlb.com/glossary/statcast/exit-velocity">does</a> and is talked about pretty frequently in baseball nowadays (though it appears F.P. <a href="https://twitter.com/FightinHydrant/status/1009644477814853632">still does not know what it is</a>).</p>
+
+<p>So I <a href="https://twitter.com/IraRickman/status/1020728572951003136">tweeted</a> at him again to further demonstrate that based on exit velocity, Soto actually averaged 87.5 mph with two strikes vs. 90.2 mph without. Using the median though, it was a more similar story (90 vs 90.6), but the histogram made it clear that Soto really was not hitting the ball harder with two strikes. He might have been hitting it as well or only slightly worse, but it was certainly not better. When factoring in his .177 average with two strikes, it should be even clearer that <strong>Juan Soto is not a better hitter with two strikes</strong>.</p>
+
+<figure>
+<figcaption> Juan Soto's exit velocity with two strikes is not better than without two strikes </figcaption>
+<img src="/assets/img/soto.png" alt="" />
+</figure>
+
+<h3 id="are-there-any-hitters-who-hit-better-with-two-strikes">Are there any hitters who hit better with two strikes?</h3>
+
+<p>While it might not be the case with Juan Soto, I wondered - Are there any hitters in the statcast era (statcast data became available in 2015) who have been better with two strikes than without? To answer this question, I downloaded data from <a href="https://baseballsavant.mlb.com/statcast_search">statcast</a>, using the <a href="https://github.com/jldbc/pybaseball/blob/master/docs/playerid_reverse_lookup.md">pybaseball</a> package on python. Then, I split each player’s stats into player-seasons, since players are different from one season to the next, and limited my analysis to hitters with more than 370 plate appearances (although batting average does not stabilize until ~900 PAs, 370 looked like a good spot in this <a href="https://www.fangraphs.com/blogs/a-long-needed-update-on-reliability/">analysis</a> and launch speed seemed pretty reliable at much lower levels). When looking at batting average (hits/at bats), 2 player-seasons out of 1,056 in the analysis had a higher average with two strikes than without.</p>
+
+<figure>
+<figcaption> Only Jose Iglesias in 2015 and Andrelton Simmons this season have higher averages with two strikes than without </figcaption>
+<img src="/assets/img/Average Table.png" alt="" />
+</figure>
+
+<p>While I was certainly surprised to see any players with a higher average with two strikes than without, I also noticed that the players in the top 20 seemed to have a lower percentage of two strike counts relative to the bottom 20. Intuitively, this makes sense, since players can’t strike out when batting without two strikes, but it does indicate a potential problem with batting average as a measurement of two strike hitting ability. When combined with its notorious dependence on batted ball luck, batting average’s utility as a metric is called into question. Despite its disadvantages though, I still wanted to get a better sense for the robustness of the trend before trying another metric, so I plotted percentage of two strike counts against difference in average.</p>
+
+<figure>
+<figcaption> It does seem that hitters with who face more two strike counts tend to be worse with two strikes </figcaption>
+<img src="/assets/img/Scatter 1.png" alt="" />
+</figure>
+
+<p>In the scatterplot above, there appears to be a relationship between higher numbers of two strike counts and lower performance in two strike counts relative to all other counts. Since this trend may just be picking up strikeouts, I decided to instead look at how hitters perform when making contact in both types of counts.</p>
+
+<h3 id="are-there-any-hitters-with-better-hitting-outcomes-with-two-strikes">Are there any hitters with better hitting outcomes with two strikes?</h3>
+
+<p>To deemphasize the influence of strikeouts, I looked at launch speed (exit velocity) and <a href="http://m.mlb.com/glossary/statcast/expected-woba">expected weighted on base average</a> (essentially an unbiased look at the expected value generated by a ball put in play, factoring in its direction, launch angle, and launch speed). Although this shift does allow a more objective analysis of how a player is hitting the ball, it suffers from the opposite problem of average. A hitter who strikes out 9 times out of 10 with two strikes, but hits a home run on the 10th time isn’t necessarily a better hitter with two strikes. Still, it’s an interesting metric for evaluating hitter performance. For the sake of comparison, below is a listing of the top 20 and bottom 20 hitters by differences in launch speed and expected weighted on base average.</p>
+
+<figure>
+<figcaption> There are players who have hit the ball harder with two strikes than without </figcaption>
+<img src="/assets/img/Launch Speed Table.png" alt="" />
+</figure>
+
+<figure>
+<figcaption> There are players who have hit for a higher xWOBA with two strikes than without </figcaption>
+<img src="/assets/img/xWOBA Table.png" alt="" />
+</figure>
+
+<p>The first thing that jumps out is the number of hitters who do seem to hit the ball harder and have higher expected outcomes with two strikes relative to other counts. Overall 258 players had higher launch speeds with two strikes and 239 had higher xWOBAs. While that’s only 24% and 23% respectively, it’s still very interesting that some players do seem to hit the ball harder and more valuably with two strikes. However, these metrics might be measuring the same thing, since harder hit balls, <a href="https://fivethirtyeight.com/features/the-new-science-of-hitting/">in general</a>, lead to higher expected run values (which is a component of what xwoba measures). With that in mind, I want to look a bit further into xWOBA, because of its more comprehensive measurement approach.</p>
+
+<p>To continue the analysis, I looked to see if players with more two strike counts had more negative differences xWOBA. According to the scatter plots below, it doesn’t seem as though it makes an impact.</p>
+
+<figure>
+<figcaption> There does not appear to be a relationship between the percentage of two strike counts and launch speed or xWOBA</figcaption>
+<img src="/assets/img/Scatter 2.png" alt="" />
+</figure>
+
+<h3 id="conclusion">Conclusion</h3>
+
+<p>While I initially felt pretty confident that a hitter couldn’t be better with two strikes than without, as much as it pains me to say it, it seems like it might be possible. However, as is always the case with baseball analysis, it can be very difficult to disentangle luck from true talent. It’s wholly possible that a hitter prefers to work counts and thus ends up with two strikes more often, giving them more comfort hitting in those counts. A hitter might also change their approach in two strike counts (as was suggested about Juan Soto), thus improving their ability to hit in those counts. It could even be as simple as hitters feeling more inclined to swing at potential strikes when in two strike counts, since the cost of a not swinging is greater. All in all though, it’s a really interesting question to look at and one I plan to keep thinking about.</p>
+
+
+
+  <!-- POST NAVIGATION -->
+  <div class="postNav clearfix">
+     
+      <a class="prev" href="/blog/MLB-Batting-Average-Projections/"><span>&laquo;&nbsp;MLB Batting Average Projection Tool</span>
+      
+    </a>
+      
+      
+      <a class="next" href="/blog/Two-Years-On-WHOOP/"><span>Two Years on WHOOP&nbsp;&raquo;</span>
+       
+      </a>
+     
+  </div>
+</div>
+
+      </div>
+   </div><!-- end .content -->
+
+   <div class="footer">
+   <div class="container">
+      <p class="copy">&copy; 2023 <a href="http://brianmaierjr.com">Brian Maier Jr.</a> Powered by <a href="http://jekyllrb.com">Jekyll</a></p>
+
+      <div class="footer-links"> 
+         <ul class="noList"> 
+            
+            
+            
+            <li><a href="https://github.com/irickman">
+                  <svg id="github" class="custom-icon" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 100 100" style="height: 30px; width: 30px;"><circle class="outer-shape" cx="50" cy="50" r="48" style="opacity: 1;"></circle>
+                  <path class="inner-shape" style="opacity: 1;" transform="translate(25,25) scale(0.5)" d="M50,1C22.938,1,1,22.938,1,50s21.938,49,49,49s49-21.938,49-49S77.062,1,50,1z M79.099,79.099 c-3.782,3.782-8.184,6.75-13.083,8.823c-1.245,0.526-2.509,0.989-3.79,1.387v-7.344c0-3.86-1.324-6.699-3.972-8.517 c1.659-0.16,3.182-0.383,4.57-0.67c1.388-0.287,2.855-0.702,4.402-1.245c1.547-0.543,2.935-1.189,4.163-1.938 c1.228-0.75,2.409-1.723,3.541-2.919s2.082-2.552,2.847-4.067s1.372-3.334,1.818-5.455c0.446-2.121,0.67-4.458,0.67-7.01 c0-4.945-1.611-9.155-4.833-12.633c1.467-3.828,1.308-7.991-0.478-12.489l-1.197-0.143c-0.829-0.096-2.321,0.255-4.474,1.053 c-2.153,0.798-4.57,2.105-7.249,3.924c-3.797-1.053-7.736-1.579-11.82-1.579c-4.115,0-8.039,0.526-11.772,1.579 c-1.69-1.149-3.294-2.097-4.809-2.847c-1.515-0.75-2.727-1.26-3.637-1.532c-0.909-0.271-1.754-0.439-2.536-0.503 c-0.782-0.064-1.284-0.079-1.507-0.048c-0.223,0.031-0.383,0.064-0.478,0.096c-1.787,4.53-1.946,8.694-0.478,12.489 c-3.222,3.477-4.833,7.688-4.833,12.633c0,2.552,0.223,4.889,0.67,7.01c0.447,2.121,1.053,3.94,1.818,5.455 c0.765,1.515,1.715,2.871,2.847,4.067s2.313,2.169,3.541,2.919c1.228,0.751,2.616,1.396,4.163,1.938 c1.547,0.543,3.014,0.957,4.402,1.245c1.388,0.287,2.911,0.511,4.57,0.67c-2.616,1.787-3.924,4.626-3.924,8.517v7.487 c-1.445-0.43-2.869-0.938-4.268-1.53c-4.899-2.073-9.301-5.041-13.083-8.823c-3.782-3.782-6.75-8.184-8.823-13.083 C9.934,60.948,8.847,55.56,8.847,50s1.087-10.948,3.231-16.016c2.073-4.899,5.041-9.301,8.823-13.083s8.184-6.75,13.083-8.823 C39.052,9.934,44.44,8.847,50,8.847s10.948,1.087,16.016,3.231c4.9,2.073,9.301,5.041,13.083,8.823 c3.782,3.782,6.75,8.184,8.823,13.083c2.143,5.069,3.23,10.457,3.23,16.016s-1.087,10.948-3.231,16.016 C85.848,70.915,82.88,75.317,79.099,79.099L79.099,79.099z"></path>
+                  </svg>
+            </a></li>
+             
+            
+            <li><a href="mailto:irickman@gmail.com">
+                  <svg id="mail" class="custom-icon" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 100 100" style="height: 30px; width: 30px;"><circle class="outer-shape" cx="50" cy="50" r="48" style="opacity: 1;"></circle>
+                  <path class="inner-shape" style="opacity: 1;" transform="translate(25,25) scale(0.5)" d="M50,1C22.938,1,1,22.938,1,50s21.938,49,49,49s49-21.938,49-49S77.062,1,50,1z M25.5,25.5h49 c0.874,0,1.723,0.188,2.502,0.542L50,57.544L22.998,26.041C23.777,25.687,24.626,25.499,25.5,25.5L25.5,25.5z M19.375,68.375v-36.75 c0-0.128,0.005-0.256,0.014-0.383l17.96,20.953L19.587,69.958C19.448,69.447,19.376,68.916,19.375,68.375L19.375,68.375z M74.5,74.5 h-49c-0.541,0-1.072-0.073-1.583-0.212l17.429-17.429L50,66.956l8.653-10.096l17.429,17.429C75.572,74.427,75.041,74.5,74.5,74.5 L74.5,74.5z M80.625,68.375c0,0.541-0.073,1.072-0.211,1.583L62.652,52.195l17.96-20.953c0.008,0.127,0.014,0.255,0.014,0.383 L80.625,68.375L80.625,68.375z"></path>
+                  </svg>
+            </a></li>
+            
+         </ul>
+      </div>
+   </div>
+</div><!-- end .footer -->
+
+
+   <!-- Add jQuery and other scripts -->
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+<script>window.jQuery || document.write('<script src=""><\/script>')</script>
+<script src="/assets/js/dropcap.min.js"></script>
+<script src="/assets/js/responsive-nav.min.js"></script>
+<script src="/assets/js/scripts.js"></script>
+
+
+</body>
+
+</html>

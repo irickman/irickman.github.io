@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<!--[if lt IE 7]><html class="no-js lt-ie9 lt-ie8 lt-ie7"><![endif]-->
+<!--[if IE 7]><html class="no-js lt-ie9 lt-ie8" <![endif]-->
+<!--[if IE 8]><html class="no-js lt-ie9" <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js"> <!--<![endif]-->
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <title>Optimizing Bikeshare Rebalancing by Identifying High Priority Stations </title>
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="/assets/img/favicon.ico" />
+
+    <!-- Come and get me RSS readers -->
+    <link rel="alternate" type="application/rss+xml" title="Ira's Data Site" href="http://irarickman.com/feed.xml" />
+
+    <!-- Stylesheet -->
+    <link rel="stylesheet" href="/assets/css/style.css">
+
+    <!--[if IE 8]><link rel="stylesheet" href="/assets/css/ie.css"><![endif]-->
+    <link rel="canonical" href="http://irarickman.com/blog/Optimizing-Bikeshare-Rebalancing/">
+
+    <!-- Modernizr -->
+    <script src="/assets/js/modernizr.custom.15390.js" type="text/javascript"></script>
+
+     <!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-NED541SQ8N"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-NED541SQ8N');
+</script> 
+</head>
+
+
+<body>
+
+    <div class="header">
+     <div class="container">
+         <h1 class="logo"><a href="/">Ira's Data Site</a></h1>
+         <nav class="nav-collapse">
+             <ul class="noList">
+                 
+                 <li class="element first  ">
+                     <a href="/index.html">Home</a>
+                 </li>
+                 
+                 <li class="element   ">
+                     <a href="/about">About</a>
+                 </li>
+                 
+                 <li class="element   last">
+                     <a href="/contact">Contact</a>
+                 </li>
+                 
+                 <li> <a href="https://github.com/irickman" target="_blank">GitHub</a></li>
+             </ul>
+         </nav>
+     </div>
+ </div><!-- end .header -->
+
+
+   <div class="content">
+      <div class="container">
+         <div class="post">
+  
+  <h1 class="postTitle">Optimizing Bikeshare Rebalancing by Identifying High Priority Stations </h1>
+  <p class="meta">September 11, 2017 | <span class="time">8</span> Minute Read</p>
+  
+  <p class="intro"><span class="dropcap">F</span>or my capstone project to conclude my 12 week Data Science Immersive course at General Assembly, I studied Capital Bikeshare data to identify the highest priority stations for bikeshare rebalancing efforts. In this post, I'll walk through my workflow, methodology, and findings, to demonstrate the locations most sensitive to emptiness. These locations should be prioritized for rebalancing efforts. </p>
+
+<h3 id="what-is-capital-bikeshare">What Is Capital Bikeshare?</h3>
+
+<p>Capital Bikeshare (CaBi) is a public bikesharing system offering bike rental service within the DC Metro area. The program offers bikes for rental (by single-ride or membership) at 347 stations in DC and Arlington, VA (and more in more distant cities). It was founded in September 2010 and has served over 14.5 million trips, all of which are publicly available for download in an anonymized format.</p>
+
+<h3 id="what-is-rebalancing">What Is Rebalancing?</h3>
+
+<p>The CaBi system has over 7500 available bike docks across their stations, but has about 3500 bikes in circulation. Even with optimal distribution, the average station will be at 50% capacity. To combat this challenge and ensure bike availability, CaBi “rebalances” bikeshare stations by moving bikes to and from empty and full stations respectively. According to this <a href="https://www.washingtonpost.com/news/dr-gridlock/wp/2013/08/02/the-army-behind-capital-bikeshares-rebalancing/?utm_term=.b05b64ef2fae">Washington Post article</a>, CaBi aims to rebalance empty/full stations within 2 hours. However, knowing which stations will refill through user trips and which will remain empty is a very difficult process to model. Further, it’s a pivotal calculation, since rebalancing is one of the largest operating expenses for CaBi. As such, figuring out which stations to prioritize for rebalancing is paramount.</p>
+
+<h3 id="how-can-we-measure-rebalancing-priority">How Can We Measure Rebalancing Priority?</h3>
+
+<p>A key aspect of determining which stations to prioritize for rebalancing is understanding the unmet demand for bikes at stations that run out of bikes. While there is no current way to truly measure the number of people who are left tireless, we can try to infer the relative differences between stations, using the change in the rates of bike removal at neighboring stations. For example, in the situation depicted below, if the rate of bikes leaving the four outer stations changes when the center station becomes empty, we can infer that there is unmet demand at that station.</p>
+
+<figure>
+<img src="/assets/img/Example Bikes.png" alt="" />
+<figcaption> The scenario on the left displays 5 stations with bikes vs. 4 stations with bikes and 1 without bikes on the right. </figcaption>
+</figure>
+
+<p>Using the logic above, I set out to identify the stations that have differences in demand for bikes for when they’re empty and not empty as <strong>measured by the average number of bikes leaving the neighboring stations.</strong></p>
+
+<h3 id="what-data-was-available">What Data Was Available?</h3>
+
+<p>To conduct my analysis, I downloaded the anonymized trip data available from <a href="https://www.capitalbikeshare.com/system-data">Capital Bikeshare</a> and accessed their publicly available <a href="https://www.motivateco.com/use-our-data/">API</a> to get the location and capacity of every bikeshare station. The trip dataset contained the variables listed below:</p>
+
+<ul>
+  <li>Bike ID</li>
+  <li>Start Station</li>
+  <li>End Station</li>
+  <li>Start Time and Date</li>
+  <li>End Time and Date</li>
+  <li>Rental Type (single-ride vs. member)</li>
+</ul>
+
+<p>Using these variables, I was able to generate a running count of the number of bikes leaving and arriving at each station, in hourly time intervals. I was also able to identify bikes that had been rebalanced from one station to another. If a trip started at a location different than the last end location for that bike, I counted it as a bike rebalanced into the starting station and rebalanced out of the ending station. With my data organized into hourly time intervals by station, I was able to keep a running count of the number of bikes present at each station. However, it was clear that some “rebalanced” bikes were unaccounted for, since the running counts on some stations far exceeded their capacities.</p>
+
+<h3 id="how-did-i-work-with-the-data">How Did I Work With The Data?</h3>
+
+<p>Given the challenge associated with knowing how many bikes were truly present at a given station, at a given time, I decided to group each station into 6 hour time blocks. Using a running count within those time blocks, I was able to measure the number of bikes taken in/out for rides and in/out for rebalancing. Once I had this status in place, I compared it against the capacity for the station and marked each time block as either full, regular, or empty. Because of the uncertainty of my measurement, I chose a very conservative estimate. I only marked a station empty or full, if the total number of bikes leaving/arriving exceeded the capacity. If this was the case, I could be certain that the station was empty or full. While using such a conservative threshold certainly considered some times when the station was full/empty as regular, it is still a good indicator of the demand for that time period and clearly signifies that many customers were returning/taking out bikes.</p>
+
+<h3 id="how-can-we-tell-which-stations-deserve-priority">How Can We Tell Which Stations Deserve Priority?</h3>
+
+<p>After generating my dataset of statuses for each station for each 6 hour time block, I added the average hourly rate of bike movement at the four nearest stations for each 6 hour time block, to create a dataset with two columns. Each station contained a status (full, empty, regular) and an average hourly rate. I used the nearest four stations, because CaBi tries to keep all new stations within a quarter mile of another station, and because the average number of stations within .35 miles of a given station is four. I assumed that a 7 minute walk (.35 miles) is the maximum someone would be willing to walk if their closest station was out of bikes. When applying this threshold, 196 of the 229 stations studied had at least one station within .35 miles and more than half had at least 3 stations within .35 miles.</p>
+
+<figure>
+<img src="/assets/img/Nearby Stations.png" alt="" />
+<figcaption> The distribution of bikeshare stations with neighboring stations within .35 miles</figcaption>
+</figure>
+
+<p>I studied 229 stations of the 347 within the DC area because only 229 stations observed at least one six-hour time block within their span of operation that resulted in an empty status. While not perfect, it still indicates that those 229 stations had periods of high demand relative to the remaining stations.</p>
+
+<p>With a complete dataset in hand, I chose to compare the differences between empty and not for each station through a Bayesian estimation model. In non-data science terms, a Bayesian estimation model is simply a method of estimating the probability of an outcome, based on our prior belief and the data we observe. In this example, our belief is that the rate of bikes leaving neighboring stations is the same for when the station of interest is empty and when it’s not. Using our model, if we find that they are different, then that means the station of interest does see an increase in bikes leaving the neighboring stations when it goes empty vs. when it has bikes.</p>
+
+<h3 id="which-stations-should-be-prioritized-for-rebalancing">Which Stations Should Be Prioritized For Rebalancing?</h3>
+
+<p>Based on the results of my analysis, 87 of the 229 stations seemed to see an uptick in the number of bikes leaving neighboring stations as a result of emptiness at the origin station. In the visualization below, I display my findings.</p>
+
+<figure>
+<figcaption> The visualization below shows bikeshare stations that should be prioritized for rebalancing </figcaption>
+<iframe src="https://public.tableau.com/views/topublic/BikeshareExplorer?:embed=y&amp;:showVizHome=no" scrolling="no" width="2000px" height="1300px">
+</iframe>
+</figure>
+
+<h3 id="recommendations">Recommendations</h3>
+
+<p>Based on my findings, I noticed that the highest priority stations were ones with a high number of neighboring stations, that run out more than average (but not the most), and have similar rates of bike trips starting and ending. These stations are more likely to see unmet demand when they run empty, as evidenced by an uptick in neighboring station bike trips, so they should be prioritized for rebalancing. In order the top 5 stations were:</p>
+
+<ol>
+  <li>15th and F St NE</li>
+  <li>Maryland Ave and  E St NE</li>
+  <li>15th and W St NW</li>
+  <li>California St and Florida Ave NW</li>
+  <li>8th and 0 St NW</li>
+</ol>
+
+<h3 id="conclusions">Conclusions</h3>
+
+<p>While my analysis did include information on existing rebalancing procedures, I do believe that I uncovered some insights on rebalancing. If we performed this analysis on stations irrespective of rebalancing, it would be very clear that the stations that go empty the most should be prioritized for rebalancing. However, with rebalancing in mind and by studying the rates at neighboring stations, we can infer that the stations identified in this analysis are very deserving of rebalancing because their emptiness leads to unmet demand and extra pressure on neighboring stations. Furthermore, those stations typically have equal rates of replacement and removal, so when they do run out, they aren’t likely to see an uptick in replacement, like the more popular stations (Union Station and Dupont Circle) would.</p>
+
+<p>In summation, there is certainly more analysis to be done, ideally on actual rates of fullness/emptiness. There clearly is some insight to be gained from this form of study and I’m hopeful that it can be used to improve the redistribution of bikes in the future.</p>
+
+
+
+  <!-- POST NAVIGATION -->
+  <div class="postNav clearfix">
+     
+      <a class="prev" href="/blog/Bikeshare-Reblancing-Viz/"><span>&laquo;&nbsp;Visualizing the Bikeshare Stations in Greatest Need of Rebalancing</span>
+      
+    </a>
+      
+      
+      <a class="next" href="/blog/Auto-Refreshing-Tableau-Public/"><span>Automatic Data Updating in Tableau Public&nbsp;&raquo;</span>
+       
+      </a>
+     
+  </div>
+</div>
+
+      </div>
+   </div><!-- end .content -->
+
+   <div class="footer">
+   <div class="container">
+      <p class="copy">&copy; 2023 <a href="http://brianmaierjr.com">Brian Maier Jr.</a> Powered by <a href="http://jekyllrb.com">Jekyll</a></p>
+
+      <div class="footer-links"> 
+         <ul class="noList"> 
+            
+            
+            
+            <li><a href="https://github.com/irickman">
+                  <svg id="github" class="custom-icon" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 100 100" style="height: 30px; width: 30px;"><circle class="outer-shape" cx="50" cy="50" r="48" style="opacity: 1;"></circle>
+                  <path class="inner-shape" style="opacity: 1;" transform="translate(25,25) scale(0.5)" d="M50,1C22.938,1,1,22.938,1,50s21.938,49,49,49s49-21.938,49-49S77.062,1,50,1z M79.099,79.099 c-3.782,3.782-8.184,6.75-13.083,8.823c-1.245,0.526-2.509,0.989-3.79,1.387v-7.344c0-3.86-1.324-6.699-3.972-8.517 c1.659-0.16,3.182-0.383,4.57-0.67c1.388-0.287,2.855-0.702,4.402-1.245c1.547-0.543,2.935-1.189,4.163-1.938 c1.228-0.75,2.409-1.723,3.541-2.919s2.082-2.552,2.847-4.067s1.372-3.334,1.818-5.455c0.446-2.121,0.67-4.458,0.67-7.01 c0-4.945-1.611-9.155-4.833-12.633c1.467-3.828,1.308-7.991-0.478-12.489l-1.197-0.143c-0.829-0.096-2.321,0.255-4.474,1.053 c-2.153,0.798-4.57,2.105-7.249,3.924c-3.797-1.053-7.736-1.579-11.82-1.579c-4.115,0-8.039,0.526-11.772,1.579 c-1.69-1.149-3.294-2.097-4.809-2.847c-1.515-0.75-2.727-1.26-3.637-1.532c-0.909-0.271-1.754-0.439-2.536-0.503 c-0.782-0.064-1.284-0.079-1.507-0.048c-0.223,0.031-0.383,0.064-0.478,0.096c-1.787,4.53-1.946,8.694-0.478,12.489 c-3.222,3.477-4.833,7.688-4.833,12.633c0,2.552,0.223,4.889,0.67,7.01c0.447,2.121,1.053,3.94,1.818,5.455 c0.765,1.515,1.715,2.871,2.847,4.067s2.313,2.169,3.541,2.919c1.228,0.751,2.616,1.396,4.163,1.938 c1.547,0.543,3.014,0.957,4.402,1.245c1.388,0.287,2.911,0.511,4.57,0.67c-2.616,1.787-3.924,4.626-3.924,8.517v7.487 c-1.445-0.43-2.869-0.938-4.268-1.53c-4.899-2.073-9.301-5.041-13.083-8.823c-3.782-3.782-6.75-8.184-8.823-13.083 C9.934,60.948,8.847,55.56,8.847,50s1.087-10.948,3.231-16.016c2.073-4.899,5.041-9.301,8.823-13.083s8.184-6.75,13.083-8.823 C39.052,9.934,44.44,8.847,50,8.847s10.948,1.087,16.016,3.231c4.9,2.073,9.301,5.041,13.083,8.823 c3.782,3.782,6.75,8.184,8.823,13.083c2.143,5.069,3.23,10.457,3.23,16.016s-1.087,10.948-3.231,16.016 C85.848,70.915,82.88,75.317,79.099,79.099L79.099,79.099z"></path>
+                  </svg>
+            </a></li>
+             
+            
+            <li><a href="mailto:irickman@gmail.com">
+                  <svg id="mail" class="custom-icon" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 100 100" style="height: 30px; width: 30px;"><circle class="outer-shape" cx="50" cy="50" r="48" style="opacity: 1;"></circle>
+                  <path class="inner-shape" style="opacity: 1;" transform="translate(25,25) scale(0.5)" d="M50,1C22.938,1,1,22.938,1,50s21.938,49,49,49s49-21.938,49-49S77.062,1,50,1z M25.5,25.5h49 c0.874,0,1.723,0.188,2.502,0.542L50,57.544L22.998,26.041C23.777,25.687,24.626,25.499,25.5,25.5L25.5,25.5z M19.375,68.375v-36.75 c0-0.128,0.005-0.256,0.014-0.383l17.96,20.953L19.587,69.958C19.448,69.447,19.376,68.916,19.375,68.375L19.375,68.375z M74.5,74.5 h-49c-0.541,0-1.072-0.073-1.583-0.212l17.429-17.429L50,66.956l8.653-10.096l17.429,17.429C75.572,74.427,75.041,74.5,74.5,74.5 L74.5,74.5z M80.625,68.375c0,0.541-0.073,1.072-0.211,1.583L62.652,52.195l17.96-20.953c0.008,0.127,0.014,0.255,0.014,0.383 L80.625,68.375L80.625,68.375z"></path>
+                  </svg>
+            </a></li>
+            
+         </ul>
+      </div>
+   </div>
+</div><!-- end .footer -->
+
+
+   <!-- Add jQuery and other scripts -->
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+<script>window.jQuery || document.write('<script src=""><\/script>')</script>
+<script src="/assets/js/dropcap.min.js"></script>
+<script src="/assets/js/responsive-nav.min.js"></script>
+<script src="/assets/js/scripts.js"></script>
+
+
+</body>
+
+</html>

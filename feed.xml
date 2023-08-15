@@ -1,0 +1,1118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Ira's Data Site</title>
+    <description>Posts on data sets, data science, and data viz.</description>
+    <link>http://irarickman.com/</link>
+    <atom:link href="http://irarickman.com/feed.xml" rel="self" type="application/rss+xml"/>
+    <pubDate>Tue, 15 Aug 2023 05:22:31 +0000</pubDate>
+    <lastBuildDate>Tue, 15 Aug 2023 05:22:31 +0000</lastBuildDate>
+    <generator>Jekyll v4.2.0</generator>
+    
+      
+      <item>
+        <title>Automating Data Pipelines with Github Actions</title>
+        <description>&lt;p class=&quot;intro&quot;&gt;&lt;span class=&quot;dropcap&quot;&gt;I&lt;/span&gt; have been interested in moving one of my existing data pipelines from Google Cloud to Github Actions for a while now, but my recent bout with COVID finally provided me some downtime to get it done. In this post, I walk through the process I used to set up a recurring workflow using Github Actions, run a script, and authenticate to Google Sheets.&lt;/p&gt;
+
+&lt;p&gt;In a previous &lt;a href=&quot;https://www.irarickman.com/blog/Autorefreshing-Tableau-Through-Google-Cloud-and-Sheets/&quot;&gt;post&lt;/a&gt;, I detailed my workflow for automating a data pipeline using Google Cloud to populate Google Sheets. While that process was cool and interesting, it was costing me about $10 a year to maintain between storage and compute. While that’s not very much, I figured it was time to cut the costs, simplify, and streamline the process by moving to Github Actions (which is free at my usage level)!&lt;/p&gt;
+
+&lt;p&gt;The complete workflow can be found on my &lt;a href=&quot;https://github.com/irickman/mlbprojections&quot;&gt;github&lt;/a&gt;, but in short I made the following changes.&lt;/p&gt;
+&lt;ol&gt;
+  &lt;li&gt;Stored my Google Service Account credentials in a &lt;a href=&quot;https://docs.github.com/en/actions/security-guides/encrypted-secrets&quot;&gt;Github Secret&lt;/a&gt;.&lt;/li&gt;
+  &lt;li&gt;Generated a requirements.txt.&lt;/li&gt;
+  &lt;li&gt;Modified my python script to take in the credentials.&lt;/li&gt;
+  &lt;li&gt;Developed a YAML file that aligned with the &lt;a href=&quot;https://docs.github.com/en/actions/learn-github-actions/understanding-github-actions&quot;&gt;Github Actions&lt;/a&gt; expected format.&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;The whole process was relatively straightforward. I followed a &lt;a href=&quot;https://canovasjm.netlify.app/2020/11/29/github-actions-run-a-python-script-on-schedule-and-commit-changes/&quot;&gt;tutorial&lt;/a&gt; for the main YAML file structure, then modified it slightly for my use case. The most difficult step was storing and reading the Service Account credentials from my Github Secrets, since the credentials are stored in a JSON format and I couldn’t get the Github Workflow to properly read the JSON.&lt;/p&gt;
+
+&lt;p&gt;Luckily, there is a wide network of Github Actions “packages” that have been created and I found the wonderful &lt;a href=&quot;https://github.com/marketplace/actions/create-json&quot;&gt;create-json&lt;/a&gt;, which allowed me to successfully read and pass the credentials. This step creates a JSON credentials file from the secret, then stores it in the temporary virtual machine that’s used to process the workflow. In my script, I simply read in the credentials JSON file, then authenticate to google sheets using the &lt;a href=&quot;https://pygsheets.readthedocs.io/en/stable/authorization.html#service-account&quot;&gt;pygsheets package&lt;/a&gt; and write to Google Sheets.&lt;/p&gt;
+
+&lt;p&gt;The result of my updated workflow is a Tableau Dashboard that allows users to project a player’s batting average through the rest of the season. I’ve linked to it &lt;a href=&quot;https://public.tableau.com/app/profile/ira.rickman/viz/MLBBattingAverageProjectionTool/PlayerProjectionTool&quot;&gt;here&lt;/a&gt; if you want to check it out!&lt;/p&gt;
+
+</description>
+        
+          <description>&lt;p class=&quot;intro&quot;&gt;&lt;span class=&quot;dropcap&quot;&gt;I&lt;/span&gt; have been interested in moving one of my existing data pipelines from Google Cloud to Github Actions for a while now, but my recent bout with COVID finally provided me some downtime to get it done. In this post, I walk through the process I used to set up a recurring workflow using Github Actions, run a script, and authenticate to Google Sheets.&lt;/p&gt;
+</description>
+        
+        <pubDate>Sun, 29 May 2022 00:00:00 +0000</pubDate>
+        <link>http://irarickman.com/blog/Automating-Data-Pipelines-with-Github-Actions/</link>
+        <guid isPermaLink="true">http://irarickman.com/blog/Automating-Data-Pipelines-with-Github-Actions/</guid>
+        
+        <category>python</category>
+        
+        <category>github actions</category>
+        
+        <category>google sheets</category>
+        
+        <category>data</category>
+        
+        <category>tableau</category>
+        
+        
+        <category>viz</category>
+        
+      </item>
+      
+    
+      
+      <item>
+        <title>Auto Refreshing Tableau Through Google Cloud and Sheets</title>
+        <description>&lt;p class=&quot;intro&quot;&gt;&lt;span class=&quot;dropcap&quot;&gt;T&lt;/span&gt;his post builds on my previous post on Auto Refreshing Tableau Public by introducing Google Cloud Compute and Google Cloud Scheduler. In my previous post, I explained how to connect a Tableau Public workbook to Google Sheets to take advantage of the daily Tableau Public-Google Sheet refresh. I described how to schedule a launch daemon locally to update the data contained within the Google Sheet, thereby refreshing the data in the connected Tableau Public workbook. While this setup works well for relatively infrequent refresh cycles, it does not work well for data that needs to be updated daily (or more frequently). The setup detailed below solves for this problem to create a truly automated data refresh procedure. &lt;/p&gt;
+
+&lt;h2 id=&quot;why-did-i-update-my-data-refresh-process&quot;&gt;Why did I update my data refresh process?&lt;/h2&gt;
+&lt;p&gt;While I was pretty pleased with my &lt;a href=&quot;http://www.irarickman.com/blog/Auto-Refreshing-Tableau-Public/&quot;&gt;original data refresh approach&lt;/a&gt; to update the Premier League table every week, I’ve since built Tableau dashboards that needed to be updated more frequently. For my &lt;a href=&quot;https://public.tableau.com/profile/ira.rickman#!/vizhome/MLBBattingAverageProjectionTool&quot;&gt;MLB Batting Average Projection Tool&lt;/a&gt;, I needed to refresh the data on a daily basis for it to be relevant. Opening my personal computer every single day of the MLB season wasn’t a great option, so I started looking around for a reliable task scheduling approach. I ultimately settled on the workflow below&lt;/p&gt;
+&lt;ol&gt;
+  &lt;li&gt;Schedule an instance to run using Google Cloud Scheduler&lt;/li&gt;
+  &lt;li&gt;Kick off a cron job within the instance to run my &lt;a href=&quot;https://github.com/irickman/projections_code/blob/master/update_batting_avg-gcp.py&quot;&gt;code&lt;/a&gt; to pull the updated data and load it to Google Sheets&lt;/li&gt;
+  &lt;li&gt;Schedule the instance to stop running using Google Cloud Scheduler (to save money since it only really needs to be on for five minutes a day)&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;I considered using Google Cloud Scheduler to execute the script directly, instead of using cron in the instance, but I like having the instance to ssh into and I was already familiar with using a virtual instance, so it was the path of least resistance. I also considered using Airflow, which I use at work, but it would have required a similar scheduling setup and an extra layer of deployment with the web server. However, I am in the process of transitioning this process to Airflow, so I can more easily schedule new jobs in the future and will update with a follow-on post once complete.&lt;/p&gt;
+
+&lt;h2 id=&quot;getting-started-with-google-cloud&quot;&gt;Getting started with Google Cloud&lt;/h2&gt;
+&lt;p&gt;If you’re setting up Google Cloud for the first time, I’d recommend following this &lt;a href=&quot;https://cloud.google.com/compute/docs/quickstart-linux&quot;&gt;guide&lt;/a&gt;. First time users on Google Cloud get a $300 credit for the first year, though you must enable billing and fill in credit card information to use it. You can also use Google Cloud’s &lt;a href=&quot;https://cloud.google.com/free/docs/gcp-free-tier#top_of_page&quot;&gt;free tier&lt;/a&gt;, which has usage limits. The free tier limits your available memory and processing power, but you should certainly have enough to perform basic operations. I use the second smallest tier instance size for this script, but it’s very cheap since I only run this for 5 minutes a day.&lt;/p&gt;
+
+&lt;h2 id=&quot;creating-an-instance&quot;&gt;Creating an instance&lt;/h2&gt;
+&lt;p&gt;I use the same instance each time so I can store my code for repeated use. There is probably a better way to do it, but this was the most straightforward method way for me. To move code between my local machine and the instance, I use GitHub. Obviously GitHub makes version control easier, but it’s also a much simpler way to move code than scp-ing (secure copying) from my local machine to the instance each time I need to update the script.&lt;/p&gt;
+
+&lt;h3 id=&quot;creating-a-project&quot;&gt;Creating a project&lt;/h3&gt;
+&lt;p&gt;To get started, you’ll first need to create a new project, since Google Cloud organizes everything within projects.  To create a new project, go to the &lt;a href=&quot;https://console.cloud.google.com/projectselector2&quot;&gt;project page&lt;/a&gt; and click “create project”. You can name it whatever you want, but make sure it’s something easy to type in case you end up referencing it from command line. After you’ve set up your project, you’ll probably want to enable the Compute Engine API. Go to your project’s console (the home page for your project - to get there click Google Cloud Platform in the upper left) and click on APIs. At the top of the next screen, click “Enable APIs and Services”, then search for the Compute Engine API and add it.&lt;/p&gt;
+
+&lt;h3 id=&quot;launching-an-instance&quot;&gt;Launching an instance&lt;/h3&gt;
+&lt;p&gt;After enabling the API, you can navigate back to console and click on the “Go to Compute Engine” link (if it doesn’t appear, click on the sidebar icon in the upper left, scroll down and click on Compute Engine). When you land in the Compute Engine, you’ll have the option to create an instance. Click “Create” to create your instance. You can give your instance a name (again, preferably an easy one to type), then select a region and availability zone. These are the Google Cloud server locations where you can host your virtual machine. The typical guidance is to choose a region close to you, but I don’t think it matters &lt;em&gt;that much&lt;/em&gt;. Your zone selection isn’t particularly important either. However, &lt;strong&gt;when you go to launch your instance, it will launch in that region, zone combination by default&lt;/strong&gt;. You can &lt;a href=&quot;https://cloud.google.com/compute/docs/instances/moving-instance-across-zones&quot;&gt;move it&lt;/a&gt; across zones in case your default zone is down (which happens occasionally), but I’ve never needed this option.&lt;/p&gt;
+
+&lt;p&gt;After selecting your region and zone, you’ll select your instance type. I use the series N1, machine-type g1-small. There are a whole bunch of options based on your computing needs. The g1-small has served me well for this and other efforts so I’ve kept it!&lt;/p&gt;
+
+&lt;figure&gt;
+&lt;img src=&quot;/assets/img/GCP Image.png&quot; alt=&quot;&quot; /&gt;
+&lt;/figure&gt;
+
+&lt;p&gt;From there, you’ll want to click “Allow full access to Cloud APIs” under Access Scopes. This will ensure your instance can be scheduled to start and stop. Lastly, you’ll want to allow HTTP and HTTPS traffic. You’ll need them to run a script that gets data from somewhere, then stores it in Google Sheets. You can change these options later, but it’s easier to set them up from the start. Once your instance is set up, you can launch it by clicking on the instance, then hitting start!&lt;/p&gt;
+
+&lt;h2 id=&quot;setting-up-your-instance&quot;&gt;Setting up your instance&lt;/h2&gt;
+
+&lt;p&gt;To connect to your instance, you can either open the connection in a new window, follow one of the other options to open it in browser, use another ssh client, or connect through gcloud (the Google Cloud command line interface).&lt;/p&gt;
+
+&lt;figure&gt;
+&lt;img src=&quot;/assets/img/Connection dropdown.png&quot; alt=&quot;&quot; /&gt;
+&lt;/figure&gt;
+
+&lt;p&gt;I use a mix of Console and gcloud to work with Google Cloud, but you can comfortably use either. However, when connecting to instances, I prefer gcloud so I can interact with them more natively. To install gcloud, follow the instructions &lt;a href=&quot;https://cloud.google.com/sdk/docs/downloads-interactive&quot;&gt;here&lt;/a&gt;. To connect to your newly created instance through gcloud, you can either &lt;a href=&quot;https://cloud.google.com/compute/docs/instances/connecting-to-instance#gcloud&quot;&gt;type out the command&lt;/a&gt; in your local terminal or copy the command from the dropdown and paste it into your local terminal. If you aren’t sure if it worked, &lt;strong&gt;you’ll know you’re in your instance if you see that your terminal lists your location as&lt;/strong&gt; &amp;lt;your google username&amp;gt;@&amp;lt;your instance name&amp;gt; (for me that’s irarickman@instance-1). Congrats, you’re now in your virtual machine!&lt;/p&gt;
+
+&lt;h3 id=&quot;installing-packages-and-tools&quot;&gt;Installing packages and tools&lt;/h3&gt;
+&lt;p&gt;For my specific use case, I needed to set up a few things to get it ready to run my MLB data refresh script. Your own setup may differ depending on your needs, but I needed the following&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;&lt;strong&gt;Python packages&lt;/strong&gt; - Your VM should come with Python. If it doesn’t, follow step two
+    &lt;ol&gt;
+      &lt;li&gt;Run &lt;strong&gt;sudo apt update&lt;/strong&gt;&lt;/li&gt;
+      &lt;li&gt;(If you don’t have python) Run &lt;strong&gt;sudo apt install python3&lt;/strong&gt;&lt;/li&gt;
+      &lt;li&gt;Run &lt;strong&gt;sudo apt install python3-pip&lt;/strong&gt; to install the latest pip&lt;/li&gt;
+      &lt;li&gt;Install any packages you need via pip3. For me this was mainly pybaseball, pygsheets, and a few smaller ones.&lt;/li&gt;
+    &lt;/ol&gt;
+  &lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;Install Git and clone your code repo&lt;/strong&gt; - If you don’t have Git installed already, follow the steps below. This assumes you want to pull code from Github or Gitlab. If not, skip this step!
+    &lt;ol&gt;
+      &lt;li&gt;Run &lt;strong&gt;sudo apt install git&lt;/strong&gt;&lt;/li&gt;
+      &lt;li&gt;Clone your repo as you normally would! I used https auth, which may prompt you for your username and password. If you use SSH, you’ll need to go through the normal ssh keygen set up.&lt;/li&gt;
+    &lt;/ol&gt;
+  &lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;Create a Google Sheets API app and connect to it&lt;/strong&gt; - To avoid recreating another tutorial, I recommend following Erik Rood’s excellent &lt;a href=&quot;https://erikrood.com/Posts/py_gsheets.html&quot;&gt;Google Sheets API setup&lt;/a&gt;. After you’ve set up your credentials, you will want to secure copy them into your instance for use.
+    &lt;ol&gt;
+      &lt;li&gt;To secure copy, open a new terminal tab so you’re back in your local directory and run
+ &lt;strong&gt;gcloud compute scp &amp;lt;file_path&amp;gt;/client_secret.json &amp;lt;googleusername&amp;gt;@&amp;lt;instance-name&amp;gt;:&amp;lt;~/file path&amp;gt;&lt;/strong&gt;. The first time you scp you’ll be asked to create a passphrase. If you just press enter twice, it will not create one. If you do enter a passphrase, you’ll need to enter it each time you scp. Skipping the passphrase can be very helpful if you try to scp again months from now and can’t remember your passphrase. If you run into any errors connecting to the instance, you may need to specify the project and zone (remember it also needs to be running)! For more guidance, I recommend checking out the &lt;a href=&quot;https://cloud.google.com/sdk/gcloud/reference/compute/scp&quot;&gt;GCP documentation&lt;/a&gt;.&lt;/li&gt;
+      &lt;li&gt;Once your creds are loaded, you can authenticate your app. This is a one time authentication. Your browser may try to warn you that the application is unsafe. You can hit advanced and proceed anyhow. To set up authentication, you can either just try running your script (and making sure you set your &lt;a href=&quot;https://pygsheets.readthedocs.io/en/stable/authorization.html&quot;&gt;authorization file location&lt;/a&gt; appropriately) or running python from the command line in the location where you moved your credentials and typing:&lt;/li&gt;
+    &lt;/ol&gt;
+  &lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;    &lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;pygsheets&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;gc&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;pygsheets&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;authorize&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+&lt;p&gt;You’ll be directed to complete the authentication flow by copying a url into browser. Follow the ensuing instructions and paste the key into the command line and you should be all set! You can see how my code uses Google Sheets &lt;a href=&quot;https://github.com/irickman/projections_code/blob/master/update_batting_avg-gcp.py&quot;&gt;here&lt;/a&gt;.&lt;/p&gt;
+
+&lt;h2 id=&quot;scheduling-your-instance&quot;&gt;Scheduling your instance&lt;/h2&gt;
+&lt;p&gt;This is the part that allows you to start and stop your instance on a regular schedule. To set up the full workflow, you’ll need to create each of the following&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;a href=&quot;https://console.cloud.google.com/cloudpubsub/&quot;&gt;Pub/Sub topic&lt;/a&gt; - A message that will carry the notification to kick off an event.&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://console.cloud.google.com/functions/&quot;&gt;Cloud Function&lt;/a&gt; - A function to actually perform an event.&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://console.cloud.google.com/cloudscheduler&quot;&gt;Cloud Schedule Task&lt;/a&gt; - A scheduled command to kick off the workflow.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&quot;setting-up-the-pubsub-topic&quot;&gt;Setting up the Pub/Sub topic&lt;/h3&gt;
+&lt;p&gt;To start, navigate to &lt;a href=&quot;https://console.cloud.google.com/cloudpubsub/&quot;&gt;Pub/Sub&lt;/a&gt; and click on “Create Topic”. You’ll want to give it an easy name to track, such as “start-instance”.&lt;/p&gt;
+
+&lt;h3 id=&quot;setting-up-the-cloud-function&quot;&gt;Setting up the Cloud Function&lt;/h3&gt;
+&lt;p&gt;Next, hop on over to your &lt;a href=&quot;https://console.cloud.google.com/functions/&quot;&gt;cloud functions&lt;/a&gt; and click “Create Function”, then follow the steps below&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;Give your function a name, probably something like “startInstance”.&lt;/li&gt;
+  &lt;li&gt;Pick your region (again, probably want to keep it in the same region).&lt;/li&gt;
+  &lt;li&gt;Select Pub/Sub as your Trigger. This is what will kick off your function. The Pub/Sub topic is really just delivering a message to your function to let it know it needs to start. In this case, it also delivers the zone and instance to start.&lt;/li&gt;
+  &lt;li&gt;Choose the “start instance” Pub/Sub in the drop-down. You can choose whether to “retry on failure”. Depending on the frequency of your task and structure you may or may not need to retry. I do not for mine.&lt;/li&gt;
+  &lt;li&gt;Hit “Next” and arrive at a code editor.&lt;/li&gt;
+  &lt;li&gt;In the “Entry Point” input field, enter the name of the function (e.g., startInstance).&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;In the index.js editor&lt;/strong&gt;, erase the existing code in the editor and enter the code below. Be sure to replace your function name where it says “exports.&lt;strong&gt;&amp;lt;enter function name e.g., startInstance&amp;gt;&lt;/strong&gt;” on lines 33 and 77. This code can also be found on google’s &lt;a href=&quot;https://github.com/GoogleCloudPlatform/nodejs-docs-samples/blob/master/functions/scheduleinstance&quot;&gt;tutorial repo&lt;/a&gt;, however I made a few small changes in lines 38-39, 82-83, and 120-122 . The script provided by Google calls for a label to be passed in the schedule task. I don’t label my Google Cloud resources, so I removed the label component from the search. &lt;strong&gt;The version below can be pasted into the index.js editor for both the start and stop function, just remember to change the stop function name&lt;/strong&gt;. To be clear, you do not need the start and stop code to be in the respective start and stop functions, but for convenience you can find all the code below.&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-javascript&quot; data-lang=&quot;javascript&quot;&gt;&lt;table class=&quot;rouge-table&quot;&gt;&lt;tbody&gt;&lt;tr&gt;&lt;td class=&quot;gutter gl&quot;&gt;&lt;pre class=&quot;lineno&quot;&gt;1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68
+69
+70
+71
+72
+73
+74
+75
+76
+77
+78
+79
+80
+81
+82
+83
+84
+85
+86
+87
+88
+89
+90
+91
+92
+93
+94
+95
+96
+97
+98
+99
+100
+101
+102
+103
+104
+105
+106
+107
+108
+109
+110
+111
+112
+113
+114
+115
+116
+117
+118
+119
+120
+121
+122
+123
+124
+125
+126
+&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;c1&quot;&gt;// Copyright 2018 Google LLC&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;//&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;// Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;// you may not use this file except in compliance with the License.&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;// You may obtain a copy of the License at&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;//&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;//      http://www.apache.org/licenses/LICENSE-2.0&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;//&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;// Unless required by applicable law or agreed to in writing, software&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;// distributed under the License is distributed on an &quot;AS IS&quot; BASIS,&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;// See the License for the specific language governing permissions and&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;// limitations under the License.&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;// [START functions_start_instance_pubsub]&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;// [START functions_stop_instance_pubsub]&lt;/span&gt;
+&lt;span class=&quot;kd&quot;&gt;const&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;Compute&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;require&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;dl&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;@google-cloud/compute&lt;/span&gt;&lt;span class=&quot;dl&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;kd&quot;&gt;const&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;compute&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;Compute&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;// [END functions_stop_instance_pubsub]&lt;/span&gt;
+
+&lt;span class=&quot;cm&quot;&gt;/**
+ * Starts Compute Engine instances.
+ *
+ * Expects a PubSub message with JSON-formatted event data containing the
+ * following attributes:
+ *  zone - the GCP zone the instances are located in.
+ *  label - the label of instances to start.
+ *
+ * @param {!object} event Cloud Function PubSub message event.
+ * @param {!object} callback Cloud Function PubSub callback indicating
+ *  completion.
+ */&lt;/span&gt;
+&lt;span class=&quot;nx&quot;&gt;exports&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;enter&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;start&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;async&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;event&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;context&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;callback&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;try&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;kd&quot;&gt;const&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;payload&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;_validatePayload&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;
+      &lt;span class=&quot;nx&quot;&gt;JSON&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;parse&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;Buffer&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;from&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;event&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;data&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;dl&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;base64&lt;/span&gt;&lt;span class=&quot;dl&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;).&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;toString&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;())&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+    &lt;span class=&quot;c1&quot;&gt;//const options = {filter: `labels.${payload.label}`};&lt;/span&gt;
+    &lt;span class=&quot;kd&quot;&gt;const&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;vms&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;await&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;compute&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;getVMs&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;await&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;Promise&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;all&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;
+      &lt;span class=&quot;nx&quot;&gt;vms&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;map&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;async&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;instance&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;payload&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;zone&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;===&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;instance&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;zone&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;id&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+          &lt;span class=&quot;kd&quot;&gt;const&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;operation&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;await&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;compute&lt;/span&gt;
+            &lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;zone&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;payload&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;zone&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+            &lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;vm&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;instance&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+            &lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;start&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+
+          &lt;span class=&quot;c1&quot;&gt;// Operation pending&lt;/span&gt;
+          &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;operation&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;promise&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+        &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+      &lt;span class=&quot;p&quot;&gt;})&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+
+    &lt;span class=&quot;c1&quot;&gt;// Operation complete. Instance successfully started.&lt;/span&gt;
+    &lt;span class=&quot;kd&quot;&gt;const&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;message&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;`Successfully started instance(s)`&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;nx&quot;&gt;console&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;log&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;message&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+    &lt;span class=&quot;nx&quot;&gt;callback&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;null&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;message&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+  &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;catch&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;err&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;nx&quot;&gt;console&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;log&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;err&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+    &lt;span class=&quot;nx&quot;&gt;callback&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;err&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+  &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;};&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;// [END functions_start_instance_pubsub]&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;// [START functions_stop_instance_pubsub]&lt;/span&gt;
+
+&lt;span class=&quot;cm&quot;&gt;/**
+ * Stops Compute Engine instances.
+ *
+ * Expects a PubSub message with JSON-formatted event data containing the
+ * following attributes:
+ *  zone - the GCP zone the instances are located in.
+ *  label - the label of instances to stop.
+ *
+ * @param {!object} event Cloud Function PubSub message event.
+ * @param {!object} callback Cloud Function PubSub callback indicating completion.
+ */&lt;/span&gt;
+&lt;span class=&quot;nx&quot;&gt;exports&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;enter&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;stop&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;async&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;event&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;context&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;callback&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;try&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;kd&quot;&gt;const&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;payload&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;_validatePayload&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;
+      &lt;span class=&quot;nx&quot;&gt;JSON&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;parse&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;Buffer&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;from&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;event&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;data&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;dl&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;base64&lt;/span&gt;&lt;span class=&quot;dl&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;).&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;toString&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;())&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+    &lt;span class=&quot;c1&quot;&gt;//const options = {filter: `labels.${payload.label}`};&lt;/span&gt;
+    &lt;span class=&quot;kd&quot;&gt;const&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;vms&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;await&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;compute&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;getVMs&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;await&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;Promise&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;all&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;
+      &lt;span class=&quot;nx&quot;&gt;vms&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;map&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;async&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;instance&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;payload&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;zone&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;===&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;instance&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;zone&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;id&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+          &lt;span class=&quot;kd&quot;&gt;const&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;operation&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;await&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;compute&lt;/span&gt;
+            &lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;zone&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;payload&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;zone&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+            &lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;vm&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;instance&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+            &lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;stop&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+
+          &lt;span class=&quot;c1&quot;&gt;// Operation pending&lt;/span&gt;
+          &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;operation&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;promise&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+        &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;else&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+          &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;Promise&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;resolve&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+        &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+      &lt;span class=&quot;p&quot;&gt;})&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+
+    &lt;span class=&quot;c1&quot;&gt;// Operation complete. Instance successfully stopped.&lt;/span&gt;
+    &lt;span class=&quot;kd&quot;&gt;const&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;message&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;`Successfully stopped instance(s)`&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;nx&quot;&gt;console&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;log&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;message&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+    &lt;span class=&quot;nx&quot;&gt;callback&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;null&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;message&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+  &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;catch&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;err&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;nx&quot;&gt;console&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;log&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;err&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+    &lt;span class=&quot;nx&quot;&gt;callback&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;err&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+  &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;};&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;// [START functions_start_instance_pubsub]&lt;/span&gt;
+
+&lt;span class=&quot;cm&quot;&gt;/**
+ * Validates that a request payload contains the expected fields.
+ *
+ * @param {!object} payload the request payload to validate.
+ * @return {!object} the payload object.
+ */&lt;/span&gt;
+&lt;span class=&quot;kd&quot;&gt;const&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;_validatePayload&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;payload&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;!&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;payload&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;zone&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;throw&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;Error&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;`Attribute 'zone' missing from payload`&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+  &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;//else if (!payload.label) {&lt;/span&gt;
+    &lt;span class=&quot;c1&quot;&gt;//throw new Error(`Attribute 'label' missing from payload`);&lt;/span&gt;
+  &lt;span class=&quot;c1&quot;&gt;//}&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;payload&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;};&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;// [END functions_start_instance_pubsub]&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;// [END functions_stop_instance_pubsub]&lt;/span&gt;
+&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;strong&gt;In the package.json editor&lt;/strong&gt;, erase the existing code in the editor and enter the following&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-json&quot; data-lang=&quot;json&quot;&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+  &lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;&quot;name&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;cloud-functions-schedule-instance&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+  &lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;&quot;version&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;0.1.0&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+  &lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;&quot;private&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;true&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+  &lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;&quot;license&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;Apache-2.0&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+  &lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;&quot;author&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;Google Inc.&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+  &lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;&quot;repository&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+    &lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;&quot;type&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;git&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+    &lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;&quot;url&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;https://github.com/GoogleCloudPlatform/nodejs-docs-samples.git&quot;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+  &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;},&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+  &lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;&quot;engines&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+    &lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;&quot;node&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;&amp;gt;=10.0.0&quot;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+  &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;},&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+  &lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;&quot;scripts&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+    &lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;&quot;test&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;mocha test/&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\*&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;.test.js --timeout=20000&quot;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+  &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;},&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+  &lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;&quot;devDependencies&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+    &lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;&quot;mocha&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;^8.0.0&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+    &lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;&quot;proxyquire&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;^2.0.0&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+    &lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;&quot;sinon&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;^9.0.0&quot;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+  &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;},&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+  &lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;&quot;dependencies&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+    &lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;&quot;@google-cloud/compute&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;^2.0.0&quot;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+  &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Click Deploy and your function should be set up! Note, in the step below, we’ll pass the zone and instance name from the scheduler, which will be delivered via Pub/Sub to the function so it knows what to start!&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&quot;setting-up-your-cloud-schedule-task&quot;&gt;Setting up your Cloud Schedule Task&lt;/h3&gt;
+&lt;p&gt;Finally, go to the &lt;a href=&quot;https://console.cloud.google.com/cloudscheduler&quot;&gt;Cloud Scheduler&lt;/a&gt;, hit “Create”, then follow the steps below&lt;/p&gt;
+&lt;ol&gt;
+  &lt;li&gt;Select a region for your job (probably the same as your instance).&lt;/li&gt;
+  &lt;li&gt;On the next page, give your job a name and description. I use “start-instance” for the one that starts it and “stop-instance” for the one that stops it!&lt;/li&gt;
+  &lt;li&gt;Specify the schedule. The caption below offers more information, but you’ll need to use the unix-cron format to schedule. The nice thing about cron scheduling is that its flexible enough to schedule for every 5 minutes or the third day of every month at midnight. For more info, check out this &lt;a href=&quot;https://cloud.google.com/scheduler/docs/configuring/cron-job-schedules?&amp;amp;_ga=2.6352244.-757052567.1596254043#defining_the_job_schedule&quot;&gt;help page&lt;/a&gt;.&lt;/li&gt;
+  &lt;li&gt;Select your timezone. Be careful when doing so. Later on we’ll discuss setting cron jobs in your instance. These default to UTC, so if you decide not to change your cron timezone, you’ll want to make sure the schedules are aligned. &lt;strong&gt;I personally like using UTC for both as it is not affected by daylight savings.&lt;/strong&gt;&lt;/li&gt;
+  &lt;li&gt;Select your target as Pub/Sub.&lt;/li&gt;
+  &lt;li&gt;Enter your topic name - it should be the name you used in the Pub/Sub step above.&lt;/li&gt;
+  &lt;li&gt;In the payload section, you’ll tell your task what zone and instance to start. Paste in and edit the code below&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-json&quot; data-lang=&quot;json&quot;&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;&quot;zone&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;&amp;lt;zone&amp;gt;&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;&quot;instance&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;&amp;lt;instance-name&amp;gt;&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;h3 id=&quot;setting-up-the-stop-instance-workflow&quot;&gt;Setting up the stop instance workflow&lt;/h3&gt;
+&lt;p&gt;The workflow above is great for starting your instance, but the whole point of this process is to start, then stop the instance. To set up the stopping workflow, follow the same steps, just change the names to stop and double check that you fill in the stop function name in the cloud function script. Remember to set the time intervals between starting and stopping appropriately so you stop the script after it’s been started (and vice versa).&lt;/p&gt;
+
+&lt;h2 id=&quot;scheduling-your-python-script&quot;&gt;Scheduling your python script&lt;/h2&gt;
+&lt;p&gt;Once you’ve set up your instance to start and stop, you’ll want to set up your script to run via crontab in the instance. This process is fortunately much more straightforward. Start up your instance and ssh in. Once in your instance, type &lt;strong&gt;crontab -e&lt;/strong&gt;. You’ll be asked to choose your editor, (I prefer nano) then you’ll be taken to the crontab file. To read more about this file, checkout &lt;a href=&quot;https://crontab.guru/crontab.5.html&quot;&gt;crontab.guru&lt;/a&gt;. There you can also find a helpful &lt;a href=&quot;https://crontab.guru/&quot;&gt;editor&lt;/a&gt; for testing crontab timing.&lt;/p&gt;
+
+&lt;p&gt;Once in your crontab file, you can schedule your script. &lt;strong&gt;Again, be mindful of timing and time zones!&lt;/strong&gt; The goal is to schedule your crontab to run while your instance is running. Your crontab will be running on UTC by default. You’ll therefore want to take into account the appropriate UTC time to align with your instance’s start/stop time. Once you find the right time, enter a command similar to the one below to schedule your script:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-shell&quot; data-lang=&quot;shell&quot;&gt; 0 10 &lt;span class=&quot;k&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;*&lt;/span&gt; python3 /home/&amp;lt;google username&amp;gt;/projections_code/update_batting_avg-gcp.py &lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;If you have multiple python installations (e.g., python 2.7, anaconda, etc.) you will need to specify exactly which python executable to use. Similarly, you will likely want to adjust your path based on where your file is located.&lt;/p&gt;
+
+&lt;p&gt;Lastly, I recommend testing your scheduler and cron times to make sure they’re in alignment. I tested mine by setting the timelines to run a few minutes later, then adjusting the actual scripts once I knew it worked. While it was a good amount of work up front, it’s certainly saved me some time since and makes for a fun Tableau dashboard. I hope you found this guide informative - please feel free to reach out through the &lt;a href=&quot;http://www.irarickman.com/contact/&quot;&gt;contact form&lt;/a&gt; with feedback!&lt;/p&gt;
+
+</description>
+        
+          <description>&lt;p class=&quot;intro&quot;&gt;&lt;span class=&quot;dropcap&quot;&gt;T&lt;/span&gt;his post builds on my previous post on Auto Refreshing Tableau Public by introducing Google Cloud Compute and Google Cloud Scheduler. In my previous post, I explained how to connect a Tableau Public workbook to Google Sheets to take advantage of the daily Tableau Public-Google Sheet refresh. I described how to schedule a launch daemon locally to update the data contained within the Google Sheet, thereby refreshing the data in the connected Tableau Public workbook. While this setup works well for relatively infrequent refresh cycles, it does not work well for data that needs to be updated daily (or more frequently). The setup detailed below solves for this problem to create a truly automated data refresh procedure. &lt;/p&gt;
+</description>
+        
+        <pubDate>Sat, 08 Aug 2020 00:00:00 +0000</pubDate>
+        <link>http://irarickman.com/blog/Autorefreshing-Tableau-Through-Google-Cloud-and-Sheets/</link>
+        <guid isPermaLink="true">http://irarickman.com/blog/Autorefreshing-Tableau-Through-Google-Cloud-and-Sheets/</guid>
+        
+        <category>python</category>
+        
+        <category>google cloud</category>
+        
+        <category>cron</category>
+        
+        <category>data</category>
+        
+        <category>tableau</category>
+        
+        
+        <category>viz</category>
+        
+      </item>
+      
+    
+      
+      <item>
+        <title>Two Years on WHOOP</title>
+        <description>&lt;p class=&quot;intro&quot;&gt;&lt;span class=&quot;dropcap&quot;&gt;E&lt;/span&gt;ach day, for the last two years, WHOOP has provided me with advanced analytics and insights on my body's strain, recovery, and sleep. WHOOP does a phenomenal job giving me the information I need to improve my performance, whether it's learning how to sleep better, train smarter, or take better care of my body. I know anecdotally that my behavior has changed as a result of WHOOP, but I wondered how much and in what ways. As a data-person, I decided to try to answer that question myself by downloading my data from the WHOOP website and visualizing it over time.&lt;/p&gt;
+
+&lt;iframe style=&quot;border: 0px;&quot; src=&quot;https://public.tableau.com/views/TwoYearsonWHOOP/Main?:embed=yes&amp;amp;:display_count=yes&amp;amp;:showVizHome=no&quot; scrolling=&quot;yes&quot; width=&quot;1440px&quot; height=&quot;1000px&quot;&gt;
+&lt;/iframe&gt;
+
+&lt;h2 id=&quot;what-is-whoop&quot;&gt;What is WHOOP?&lt;/h2&gt;
+&lt;p&gt;&lt;a href=&quot;https://www.whoop.com/&quot;&gt;WHOOP&lt;/a&gt; was founded in 2011 by Will Ahmed, a former squash player at Harvard who constantly felt overtrained. He wanted more information about how and why his body performed well one day and poorly the next, so he built WHOOP alongside his co-founders. A WHOOP membership gets you a watch-sized wristband that monitors your body as long as you wear it. The wristband syncs with their app via bluetooth and provides advanced analysis on &lt;a href=&quot;https://www.whoop.com/experience/#strain&quot;&gt;strain&lt;/a&gt;, &lt;a href=&quot;https://www.whoop.com/experience/#recovery&quot;&gt;recovery&lt;/a&gt;, and &lt;a href=&quot;https://www.whoop.com/experience/#sleep&quot;&gt;sleep&lt;/a&gt;. The app shows you real-time data on things like heart rate and activity so you can keep track of how much stress you’ve put on your body over the course of your day. Each morning, the WHOOP app analyzes your sleep to generate a 0%-100% recovery score along with detailed sleep analysis. Based on your recovery score, WHOOP recommends a daily strain target to prevent over-training and keep your body fresh.&lt;/p&gt;
+
+&lt;h2 id=&quot;how-has-my-behavior-changed-on-whoop&quot;&gt;How has my behavior changed on WHOOP?&lt;/h2&gt;
+&lt;p&gt;Within a few months of joining WHOOP, I definitely started taking sleep more seriously. I discovered that I regularly spent an hour awake at night, meaning I wasn’t getting as much sleep as I thought, and was sleeping significantly less than I should (yep  - WHOOP has a recommendation for that)! As a result, my recovery scores were pretty up and down.&lt;/p&gt;
+
+&lt;p&gt;WHOOP buckets recovery into three categories and their advice is pretty simple:&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;&lt;strong&gt;Red (0-33%)&lt;/strong&gt; - you should probably rest&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;Yellow (34-66%)&lt;/strong&gt; - you’re ok to work out, but probably not too hard&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;Green (67-100%)&lt;/strong&gt; - go hard&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;During my first few months, I’d get a few greens here and there, but most of my recoveries were red or yellow. I wasn’t following WHOOP’s training advice because I had to prepare for my triathlon! I’d put together my training plan months earlier and couldn’t afford to skip half my workouts for the week because WHOOP told me I was “in the red”. Because I wasn’t taking my recovery seriously, I thought red days were inevitable and that there wasn’t much I could do to avoid them. I was training for a triathlon after all - of course I’d get run-down.&lt;/p&gt;
+
+&lt;p&gt;At the time, I was mostly just interested in having more data on my body and in knowing when to push harder in training. I knew that I typically felt better (and was likelier to be in the green) on weekends because I slept in, but getting more sleep during the week didn’t seem like an option. &lt;strong&gt;I wasn’t treating sleep as something I had control over, so I wasn’t putting my body in a position to succeed&lt;/strong&gt;. Over time, I realized that I was clearly wrong. Not only is it easier to just go to bed earlier, but there are other things within my control to &lt;a href=&quot;https://www.whoop.com/thelocker/sleeping-tips-from-100-best-sleepers/&quot;&gt;fall asleep and stay asleep&lt;/a&gt;. While I certainly haven’t done everything within my power to maximize my sleep, just thinking about it more has translated to more sleep.&lt;/p&gt;
+
+&lt;figure&gt;
+&lt;figcaption&gt; I've gotten more sleep, the longer I've been on WHOOP. Working from home during COVID-19 has certainly helped as well&lt;/figcaption&gt;
+&lt;img src=&quot;/assets/img/Sleep Trend.png&quot; alt=&quot;&quot; /&gt;
+&lt;/figure&gt;
+
+&lt;p&gt;As a result, I’ve significantly cut down on my red recoveries per month. Along with getting more sleep, taking rest days and hydrating better have made a huge impact on my recovery. While WHOOP only recently added the ability for me to track the effect of hydration, it’s something I’ve felt for a while.&lt;/p&gt;
+
+&lt;figure&gt;
+&lt;figcaption&gt; Sleeping more has helped me cut down on my red recoveries&lt;/figcaption&gt;
+&lt;img src=&quot;/assets/img/Red Trend.png&quot; alt=&quot;&quot; /&gt;
+&lt;/figure&gt;
+
+&lt;h3 id=&quot;recovery&quot;&gt;Recovery&lt;/h3&gt;
+&lt;p&gt;The biggest change to my recovery has been fewer red days. &lt;strong&gt;Between my first year on WHOOP and my second, I went from averaging 11.2 reds per month to 6.9!&lt;/strong&gt;  While some of that is due to reduced training load, I believe the rest is attributable to changes to my sleep and recovery approach.&lt;/p&gt;
+
+&lt;p&gt;My fitness peaked in May 2019, at the end of my first year on WHOOP. My median HRV that month was 116, despite having only 9 greens to go along with 13 yellows and 9 reds. Even in a majority red and yellow month, my median HRV was so high because I averaged a 121.4 HRV for yellow recoveries in May. In comparison, during January 2019, I averaged a 115 for green recoveries alone, meaning &lt;strong&gt;the same HRV in different months resulted in different recoveries!&lt;/strong&gt; This isn’t uncommon because WHOOP’s recovery formula adjusts for both short-term and long-term trends in HRV, but seeing the difference between the two months indicates that I was &lt;a href=&quot;https://www.whoop.com/thelocker/what-is-a-good-hrv&quot;&gt;much fitter&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;In June and July 2019 my fitness tanked though. I went to Peru to hike the Inca trail and caught a pretty bad cold. Between the cold, elevation, and lack of sleep I came back to the US with a deep-chested cough and had to take three weeks off from training for the Berlin Marathon. Despite rushing to regain my endurance, just 12 weeks before the race, I was pretty close to peak form on race day and turned in a &lt;a href=&quot;https://www.strava.com/activities/2749973242&quot;&gt;great performance&lt;/a&gt;.&lt;/p&gt;
+
+&lt;h3 id=&quot;sleep&quot;&gt;Sleep&lt;/h3&gt;
+&lt;p&gt;I slept more on average in my second year, despite a few months below my year one average. From May - August 2019 while training for the marathon, I didn’t get enough sleep, even though I needed it more. Coming off that training cycle, the importance of sleep really clicked for me and over the last six months, I’ve focused on getting more. Interestingly, as I spend less time “in the red”, my red recovery sleeps look more similar to my yellow and green sleeps. &lt;strong&gt;My theory is that I’m no longer getting reds because of lack of sleep, but merely because my body needs a rest&lt;/strong&gt;.&lt;/p&gt;
+
+&lt;p&gt;I also noticed that my red recoveries seem to come in waves. In months with the most reds, my average sleep is lowest. &lt;strong&gt;Undersleeping while carrying sleep debt begets even more sleep debt, making it even harder to fully recover&lt;/strong&gt;. In a later post, I’ll look into this idea of cascading reds, but for now it seems that red recoveries don’t occur in isolation. The behaviors that lead to red recoveries take a few days to fix - for example, I can’t just catch up all my sleep in one night. I need to consistently hit my sleep goals to avoid reds.&lt;/p&gt;
+
+&lt;p&gt;Accordingly, on nights when I had more than an hour of sleep debt, I slept 42 minutes longer the next night in year two, compared against 33 minutes longer in year one. I also carried less sleep debt throughout the year as a result of better sleep performances. Mainly, I tried to focus more on sleep in my second year and it shows. In both years, I seemed to carry less sleep debt during the winter months, likely because I trained less during those times, but in my second year I was able to cut monthly average sleep debt from January - May almost in half.&lt;/p&gt;
+
+&lt;p&gt;Lastly, I was surprised to see that my quality of sleep actually went down in year two. Although I slept longer, I spent more time awake than in year one. &lt;strong&gt;My suspicion is that I sleep more soundly through the night when I’m exhausted&lt;/strong&gt; than when I’m well-rested, so actually, trying to stay asleep longer is a good problem to have! While my REM % stayed consistent, I did see an increase in deep sleep %, which is a great source of restoration.&lt;/p&gt;
+
+&lt;h3 id=&quot;strain&quot;&gt;Strain&lt;/h3&gt;
+&lt;p&gt;My biggest change year over year was in strain. I started actually taking rest days and cut my red day workout rate from 59% to 48%. While my overall strain on red days still looked similar to or even higher in my second year, the combination of fewer red days and fewer red day workouts helped me stay fresher. I still did work out on red days, but I tried to take them easier than before. If I was scheduled for a long-run on the weekend and I woke up “in the red”, I’d try to push it to the next day (or move it up a day if I woke up “in the green”).&lt;/p&gt;
+
+&lt;p&gt;Interestingly, my average strain on green days decreased year over year, but I think that can be chalked up to just having more green days. It’s hard to go hard every time I’m “in the green”, but it did give me more flexibility. If I woke up “in the green” and I felt good, I might push the pace a bit more on a run than I otherwise would have.&lt;/p&gt;
+
+&lt;p&gt;The achievement I’m most proud of though, is the number of months in year two where my green recoveries were preceded by “under-strain” days. During those months, I had lots of greens and working out below the recommended amount was a big reason why. &lt;strong&gt;Four of my top five “greenest” months were in the last year&lt;/strong&gt;, highlighted by January 2020, when I averaged 2.8 greens per week. Sometimes when I’m “in the green”, I don’t feel as good as WHOOP tells me I do, but during that month I felt pretty good almost every day. It was great, but obviously difficult to hold on to since getting green recoveries is harder as you get fitter.&lt;/p&gt;
+
+&lt;h3 id=&quot;training&quot;&gt;Training&lt;/h3&gt;
+&lt;p&gt;My approach to WHOOP had a clear effect on my recoveries while training for races as well. In year one I trained for a triathlon over the summer, then in year two I trained for a marathon over roughly the same timeframe, but I had much better recoveries during marathon training. &lt;strong&gt;I went from 40% red recoveries during tri training to 31% red recoveries during marathon training&lt;/strong&gt;. Additionally, I reduced the percentage of my weekly strain that came on red days so I was able to get more rest. With the exception of my trip to Peru, which I covered above, my Berlin training cycle tracked pretty well with what I’d hoped.&lt;/p&gt;
+
+&lt;h3 id=&quot;travel&quot;&gt;Travel&lt;/h3&gt;
+&lt;p&gt;One of my favorite things WHOOP has helped me understand is the effect of &lt;a href=&quot;https://www.whoop.com/thelocker/the-effect-of-travel-on-sleep-and-recovery/&quot;&gt;travel&lt;/a&gt; on recovery. I’ve always felt like I needed to run before I did anything else when traveling somewhere new. It turns out that’s actually one of a number of great ways to adjust to changing time zones. Overall though, traveling is tough on the body, so I took a look at three trips where I flew over five hours to see how my body reacted. In all three trips my average recovery was much lower during travel than beforehand, &lt;strong&gt;even though my sleep performance was roughly the same or better&lt;/strong&gt;. I was surprised to learn that my sleep quality seemed unaffected, while my restorative sleep (REM + deep) was inconsistent. After all three trips my sleep performance was much higher than before or during, but my recovery was inconsistent relative to pre and mid-trip.&lt;/p&gt;
+
+&lt;h2 id=&quot;conclusions&quot;&gt;Conclusions&lt;/h2&gt;
+&lt;p&gt;When I listen to WHOOP’s podcasts, where athletes and fitness enthusiasts discuss their lives and how they use WHOOP, they always mention how quickly they took to it. They talk about how much they learn about sleep and how nice it is to have another way of viewing their fitness. I imagine this is true of most WHOOP users - you learn a lot in your first few weeks, then plateau for a bit as it becomes part of your everyday life. I went through this during my first year on WHOOP, but I’ve found there’s also a second period of realization that takes longer to arrive and is much more impactful.&lt;/p&gt;
+
+&lt;p&gt;After being on WHOOP for two years, I’ve started to notice how my behaviors translate to my recovery. When I drink more water, I’m likelier to be “in the green”. When I avoid using my phone 30 minutes before bed, I’m likelier to fall asleep fast and stay asleep through the night. When I avoid those one or two weeknight beers, I’m likelier to wake up feeling refreshed the next day. Using what I’ve learned, I could probably get pretty close to spending most days “in the green” if I lived in a perfectly controlled environment. Obviously I don’t, but that’s what’s so great about WHOOP - &lt;strong&gt;it gives you the information, and it’s up to you how you use it.&lt;/strong&gt; By analyzing my data through this project, I’ve been able to see exactly how much I’ve used it and how my behavior has changed for the better.&lt;/p&gt;
+
+</description>
+        
+          <description>&lt;p class=&quot;intro&quot;&gt;&lt;span class=&quot;dropcap&quot;&gt;E&lt;/span&gt;ach day, for the last two years, WHOOP has provided me with advanced analytics and insights on my body's strain, recovery, and sleep. WHOOP does a phenomenal job giving me the information I need to improve my performance, whether it's learning how to sleep better, train smarter, or take better care of my body. I know anecdotally that my behavior has changed as a result of WHOOP, but I wondered how much and in what ways. As a data-person, I decided to try to answer that question myself by downloading my data from the WHOOP website and visualizing it over time.&lt;/p&gt;
+</description>
+        
+        <pubDate>Tue, 16 Jun 2020 00:00:00 +0000</pubDate>
+        <link>http://irarickman.com/blog/Two-Years-On-WHOOP/</link>
+        <guid isPermaLink="true">http://irarickman.com/blog/Two-Years-On-WHOOP/</guid>
+        
+        <category>whoop</category>
+        
+        <category>python</category>
+        
+        <category>api</category>
+        
+        <category>fitness</category>
+        
+        <category>data</category>
+        
+        <category>tableau</category>
+        
+        
+        <category>viz</category>
+        
+      </item>
+      
+    
+      
+      <item>
+        <title>Hitting with Two Strikes</title>
+        <description>&lt;p class=&quot;intro&quot;&gt;&lt;span class=&quot;dropcap&quot;&gt;A&lt;/span&gt;bout a month ago, Juan Soto was up to bat with a two strike count, in the first inning of a Washington Nationals game. While I watched on TV, the color commentator, F.P. Santangelo, said that he thought Juan Soto was actually a better hitter with two strikes. As a fan of the game and a fan of data analysis, I respectfully disagreed. I looked up his numbers and saw that with two strikes, Soto was hitting .177, while hitting .301 overall. Clearly, he's a better hitter without two strikes, so I tweeted at Santangelo to share the news. &lt;/p&gt;
+
+&lt;p&gt;Later in the game, Soto hit a home run on a two strike pitch and &lt;a href=&quot;https://www.mlb.com/video/sotos-2-run-jack/c-2289044883&quot;&gt;Santangelo used this as vindication&lt;/a&gt; (40 seconds in) against all the people on Twitter who suggested he was wrong. A quick search revealed only one other person tweeted at him on the subject, so it appears he saw my tweet. He continued on to explain that actually, Soto hits the ball very hard with two strikes, which is something that doesn’t always show up in the stats. I was surprised to hear this explanation, given it that it &lt;a href=&quot;http://m.mlb.com/glossary/statcast/exit-velocity&quot;&gt;does&lt;/a&gt; and is talked about pretty frequently in baseball nowadays (though it appears F.P. &lt;a href=&quot;https://twitter.com/FightinHydrant/status/1009644477814853632&quot;&gt;still does not know what it is&lt;/a&gt;).&lt;/p&gt;
+
+&lt;p&gt;So I &lt;a href=&quot;https://twitter.com/IraRickman/status/1020728572951003136&quot;&gt;tweeted&lt;/a&gt; at him again to further demonstrate that based on exit velocity, Soto actually averaged 87.5 mph with two strikes vs. 90.2 mph without. Using the median though, it was a more similar story (90 vs 90.6), but the histogram made it clear that Soto really was not hitting the ball harder with two strikes. He might have been hitting it as well or only slightly worse, but it was certainly not better. When factoring in his .177 average with two strikes, it should be even clearer that &lt;strong&gt;Juan Soto is not a better hitter with two strikes&lt;/strong&gt;.&lt;/p&gt;
+
+&lt;figure&gt;
+&lt;figcaption&gt; Juan Soto's exit velocity with two strikes is not better than without two strikes &lt;/figcaption&gt;
+&lt;img src=&quot;/assets/img/soto.png&quot; alt=&quot;&quot; /&gt;
+&lt;/figure&gt;
+
+&lt;h3 id=&quot;are-there-any-hitters-who-hit-better-with-two-strikes&quot;&gt;Are there any hitters who hit better with two strikes?&lt;/h3&gt;
+
+&lt;p&gt;While it might not be the case with Juan Soto, I wondered - Are there any hitters in the statcast era (statcast data became available in 2015) who have been better with two strikes than without? To answer this question, I downloaded data from &lt;a href=&quot;https://baseballsavant.mlb.com/statcast_search&quot;&gt;statcast&lt;/a&gt;, using the &lt;a href=&quot;https://github.com/jldbc/pybaseball/blob/master/docs/playerid_reverse_lookup.md&quot;&gt;pybaseball&lt;/a&gt; package on python. Then, I split each player’s stats into player-seasons, since players are different from one season to the next, and limited my analysis to hitters with more than 370 plate appearances (although batting average does not stabilize until ~900 PAs, 370 looked like a good spot in this &lt;a href=&quot;https://www.fangraphs.com/blogs/a-long-needed-update-on-reliability/&quot;&gt;analysis&lt;/a&gt; and launch speed seemed pretty reliable at much lower levels). When looking at batting average (hits/at bats), 2 player-seasons out of 1,056 in the analysis had a higher average with two strikes than without.&lt;/p&gt;
+
+&lt;figure&gt;
+&lt;figcaption&gt; Only Jose Iglesias in 2015 and Andrelton Simmons this season have higher averages with two strikes than without &lt;/figcaption&gt;
+&lt;img src=&quot;/assets/img/Average Table.png&quot; alt=&quot;&quot; /&gt;
+&lt;/figure&gt;
+
+&lt;p&gt;While I was certainly surprised to see any players with a higher average with two strikes than without, I also noticed that the players in the top 20 seemed to have a lower percentage of two strike counts relative to the bottom 20. Intuitively, this makes sense, since players can’t strike out when batting without two strikes, but it does indicate a potential problem with batting average as a measurement of two strike hitting ability. When combined with its notorious dependence on batted ball luck, batting average’s utility as a metric is called into question. Despite its disadvantages though, I still wanted to get a better sense for the robustness of the trend before trying another metric, so I plotted percentage of two strike counts against difference in average.&lt;/p&gt;
+
+&lt;figure&gt;
+&lt;figcaption&gt; It does seem that hitters with who face more two strike counts tend to be worse with two strikes &lt;/figcaption&gt;
+&lt;img src=&quot;/assets/img/Scatter 1.png&quot; alt=&quot;&quot; /&gt;
+&lt;/figure&gt;
+
+&lt;p&gt;In the scatterplot above, there appears to be a relationship between higher numbers of two strike counts and lower performance in two strike counts relative to all other counts. Since this trend may just be picking up strikeouts, I decided to instead look at how hitters perform when making contact in both types of counts.&lt;/p&gt;
+
+&lt;h3 id=&quot;are-there-any-hitters-with-better-hitting-outcomes-with-two-strikes&quot;&gt;Are there any hitters with better hitting outcomes with two strikes?&lt;/h3&gt;
+
+&lt;p&gt;To deemphasize the influence of strikeouts, I looked at launch speed (exit velocity) and &lt;a href=&quot;http://m.mlb.com/glossary/statcast/expected-woba&quot;&gt;expected weighted on base average&lt;/a&gt; (essentially an unbiased look at the expected value generated by a ball put in play, factoring in its direction, launch angle, and launch speed). Although this shift does allow a more objective analysis of how a player is hitting the ball, it suffers from the opposite problem of average. A hitter who strikes out 9 times out of 10 with two strikes, but hits a home run on the 10th time isn’t necessarily a better hitter with two strikes. Still, it’s an interesting metric for evaluating hitter performance. For the sake of comparison, below is a listing of the top 20 and bottom 20 hitters by differences in launch speed and expected weighted on base average.&lt;/p&gt;
+
+&lt;figure&gt;
+&lt;figcaption&gt; There are players who have hit the ball harder with two strikes than without &lt;/figcaption&gt;
+&lt;img src=&quot;/assets/img/Launch Speed Table.png&quot; alt=&quot;&quot; /&gt;
+&lt;/figure&gt;
+
+&lt;figure&gt;
+&lt;figcaption&gt; There are players who have hit for a higher xWOBA with two strikes than without &lt;/figcaption&gt;
+&lt;img src=&quot;/assets/img/xWOBA Table.png&quot; alt=&quot;&quot; /&gt;
+&lt;/figure&gt;
+
+&lt;p&gt;The first thing that jumps out is the number of hitters who do seem to hit the ball harder and have higher expected outcomes with two strikes relative to other counts. Overall 258 players had higher launch speeds with two strikes and 239 had higher xWOBAs. While that’s only 24% and 23% respectively, it’s still very interesting that some players do seem to hit the ball harder and more valuably with two strikes. However, these metrics might be measuring the same thing, since harder hit balls, &lt;a href=&quot;https://fivethirtyeight.com/features/the-new-science-of-hitting/&quot;&gt;in general&lt;/a&gt;, lead to higher expected run values (which is a component of what xwoba measures). With that in mind, I want to look a bit further into xWOBA, because of its more comprehensive measurement approach.&lt;/p&gt;
+
+&lt;p&gt;To continue the analysis, I looked to see if players with more two strike counts had more negative differences xWOBA. According to the scatter plots below, it doesn’t seem as though it makes an impact.&lt;/p&gt;
+
+&lt;figure&gt;
+&lt;figcaption&gt; There does not appear to be a relationship between the percentage of two strike counts and launch speed or xWOBA&lt;/figcaption&gt;
+&lt;img src=&quot;/assets/img/Scatter 2.png&quot; alt=&quot;&quot; /&gt;
+&lt;/figure&gt;
+
+&lt;h3 id=&quot;conclusion&quot;&gt;Conclusion&lt;/h3&gt;
+
+&lt;p&gt;While I initially felt pretty confident that a hitter couldn’t be better with two strikes than without, as much as it pains me to say it, it seems like it might be possible. However, as is always the case with baseball analysis, it can be very difficult to disentangle luck from true talent. It’s wholly possible that a hitter prefers to work counts and thus ends up with two strikes more often, giving them more comfort hitting in those counts. A hitter might also change their approach in two strike counts (as was suggested about Juan Soto), thus improving their ability to hit in those counts. It could even be as simple as hitters feeling more inclined to swing at potential strikes when in two strike counts, since the cost of a not swinging is greater. All in all though, it’s a really interesting question to look at and one I plan to keep thinking about.&lt;/p&gt;
+
+</description>
+        
+          <description>&lt;p class=&quot;intro&quot;&gt;&lt;span class=&quot;dropcap&quot;&gt;A&lt;/span&gt;bout a month ago, Juan Soto was up to bat with a two strike count, in the first inning of a Washington Nationals game. While I watched on TV, the color commentator, F.P. Santangelo, said that he thought Juan Soto was actually a better hitter with two strikes. As a fan of the game and a fan of data analysis, I respectfully disagreed. I looked up his numbers and saw that with two strikes, Soto was hitting .177, while hitting .301 overall. Clearly, he's a better hitter without two strikes, so I tweeted at Santangelo to share the news. &lt;/p&gt;
+</description>
+        
+        <pubDate>Sat, 25 Aug 2018 00:00:00 +0000</pubDate>
+        <link>http://irarickman.com/blog/Hitting-with-Two-Strikes/</link>
+        <guid isPermaLink="true">http://irarickman.com/blog/Hitting-with-Two-Strikes/</guid>
+        
+        <category>baseball</category>
+        
+        <category>python</category>
+        
+        <category>statcast</category>
+        
+        
+        <category>viz</category>
+        
+      </item>
+      
+    
+      
+      <item>
+        <title>MLB Batting Average Projection Tool</title>
+        <description>&lt;p class=&quot;intro&quot;&gt;&lt;span class=&quot;dropcap&quot;&gt;A&lt;/span&gt;round this time each Major League Baseball season, games stop for the All-Star break and players get a chance to rest and reflect on the first half of their season. In some cases it can be a chance to reset following a poor first half, while for others it's a chance to double down and continue stroking. For every hot start that cools in the second half (Ryan Zimmerman 2017) there's a cool start that heats up (Kevin Kiermaier 2017).&lt;/p&gt;
+
+&lt;p&gt;In honor of this year’s All-Star Break, I’ve put together the visualization below to help project batting averages for every MLB player. Using the Tableau visualization below, you can see how a player’s first half batting average trended as the season went on. Then, using the parameters on the right side, project how his batting average might change over the rest of the year. There’s also some notable stats on the average a player would need in the second half to hit .300 or hit at their team’s average. Here are some of the more notable ones (assuming 4 ABs per game unless otherwise noted):&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Bryce Harper would need to hit .406 to reach .300 by the end of the season&lt;/li&gt;
+  &lt;li&gt;Mookie Betts can hit .232 and still finish at .300&lt;/li&gt;
+  &lt;li&gt;Mike Trout can hit .157 and finish the season on par with the Angels’ .243 team average&lt;/li&gt;
+  &lt;li&gt;Assuming a 1 AB per game average (to account for pitching every fifth day) Max Scherzer needs to hit .328 to finish the season at .300&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&quot;how-i-built-it&quot;&gt;How I Built It&lt;/h3&gt;
+
+&lt;p&gt;Developing the MLB Batting Average Projection Tool was much more difficult than I anticipated. I knew I could get data from MLB’s Statcast tool and I knew I could automatically update and refresh my visualization each day, using a Mac OS LaunchDaemon, python, Google Sheets, and Tableau Public, but getting the data formatted and synchronizing the updating schedule took some configuration. To begin, I found a nifty package called &lt;a href=&quot;https://github.com/jldbc/pybaseball/blob/master/docs/playerid_reverse_lookup.md&quot;&gt;pybaseball&lt;/a&gt;, which allowed me to download data from &lt;a href=&quot;https://baseballsavant.mlb.com/statcast_search&quot;&gt;MLB’s Statcast search&lt;/a&gt;, which tracks pitch-by-pitch data for every MLB game. From there, I filtered for events resulting in the end of a plate appearance and determined whether the plate appearance counted as an at bat and whether it ended in a hit.&lt;/p&gt;
+
+&lt;p&gt;Following a bit more formatting, I combined my data cleansing code with my data downloading code, to automatically add new game data to existing data. I then added each team’s remaining schedule, again, using the pybaseball package, to create a dataset of each player’s hits and at bats per game and their team’s remaining games. Next, I uploaded the data to Google Sheets and then wrote a &lt;a href=&quot;https://medium.com/@fahimhossain_16989/adding-startup-scripts-to-launch-daemon-on-mac-os-x-sierra-10-12-6-7e0318c74de1&quot;&gt;LaunchDaemon&lt;/a&gt; to automatically repeat this process each day (assuming I open my computer).&lt;/p&gt;
+
+&lt;p&gt;Once I had the data in Google Sheets, I created a Tableau Public visualization connected to the Google Sheets data and started creating my sheets. While most of it was pretty straightforward, the most interesting challenge I encountered in Tableau was developing the running sum calculation, which keeps track of aggregate batting average over time. After playing around with a few table calculation options, I got it working. Lastly, I added the parameter calculations and put some formatting touches in place before finally publishing to Tableau Public.&lt;/p&gt;
+
+&lt;iframe style=&quot;border: 0px;&quot; src=&quot;https://public.tableau.com/views/MLBBattingAverageProjectionTool/PlayerProjectionTool?:embed=y&amp;amp;:showVizHome=no&quot; scrolling=&quot;no&quot; width=&quot;1000px&quot; height=&quot;1000px&quot;&gt;
+&lt;/iframe&gt;
+
+&lt;h3 id=&quot;potential-improvements&quot;&gt;Potential Improvements&lt;/h3&gt;
+
+&lt;p&gt;I’m pretty pleased with the product as it stands. Except for a few minor quirks, like projecting batting averages for pitchers and instances of negative batting average projections (because a player’s average is so high, he couldn’t possibly end the season below a certain average), I think it’s a pretty neat tool. Besides adding additional rate stats (it’s not too exciting to project home runs), the only other improvement I might make is developing a model to actually project a player’s end of season batting average. That’s a pretty big ordeal though and Steamer/ZIPS do a pretty good job already, so we’ll see if I get to it. I’ve enjoyed playing around with the tool thus far and I hope you will too!&lt;/p&gt;
+
+</description>
+        
+          <description>&lt;p class=&quot;intro&quot;&gt;&lt;span class=&quot;dropcap&quot;&gt;A&lt;/span&gt;round this time each Major League Baseball season, games stop for the All-Star break and players get a chance to rest and reflect on the first half of their season. In some cases it can be a chance to reset following a poor first half, while for others it's a chance to double down and continue stroking. For every hot start that cools in the second half (Ryan Zimmerman 2017) there's a cool start that heats up (Kevin Kiermaier 2017).&lt;/p&gt;
+</description>
+        
+        <pubDate>Wed, 18 Jul 2018 00:00:00 +0000</pubDate>
+        <link>http://irarickman.com/blog/MLB-Batting-Average-Projections/</link>
+        <guid isPermaLink="true">http://irarickman.com/blog/MLB-Batting-Average-Projections/</guid>
+        
+        <category>viz</category>
+        
+        <category>baseball</category>
+        
+        <category>tableau</category>
+        
+        <category>google sheets</category>
+        
+        <category>python</category>
+        
+        <category>statcast</category>
+        
+        
+        <category>viz</category>
+        
+      </item>
+      
+    
+      
+      <item>
+        <title>Automatic Data Updating in Tableau Public</title>
+        <description>&lt;h3 id=&quot;updated-post&quot;&gt;Updated Post&lt;/h3&gt;
+&lt;p&gt;&lt;strong&gt;I’ve put together an update to this post that leverages Google Cloud Compute, Google Cloud Scheduler, and cron to truly automate this process&lt;/strong&gt;. While the process below works well if you keep your computer on for each scheduled launch daemon, it doesn’t work well for data that needs to be refreshed more regularly or during off-peak hours. The updated approach does a better job handling these situations and can be found &lt;a href=&quot;http://www.irarickman.com/Automatic-Tableau-Data-Refreshing-Through-Google-Cloud-and-Sheets/&quot;&gt;here&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p class=&quot;intro&quot;&gt;&lt;span class=&quot;dropcap&quot;&gt;I&lt;/span&gt;n a previous post, I introduced my Premier League Team Selection Tool, which used MLB team allegiance to suggest Premier League clubs based on a k-means clustering exercise. I was really happy with the final product, except for one glaring issue. I included a Premier League Table at the bottom of the viz, meant to be as close to live as possible. In reality, it required a manual update each game week, which defeated the purpose of it being &quot;live&quot;.&lt;/p&gt;
+
+&lt;p&gt;As a result of Tableau Public’s composition, each time I wanted to update the league table, I’d have to sign in, update the workbook, then reupload it to Tableau Public. Given that my interest in coding was spurred by a desire to eliminate my repeatable tasks, I figured this was just another task to automate. My solution ended up being three parts: Finding a Data Source, Getting Tableau Public to Refresh Automatically, and Scheduling it to Update Weekly.&lt;/p&gt;
+
+&lt;h3 id=&quot;finding-a-data-source&quot;&gt;Finding a Data Source&lt;/h3&gt;
+
+&lt;p&gt;My old process used an Import.IO web connector to scrape data from Fox Sports’ EPL page. However, Import.IO discontinued their web connector, so I had to find a new data source. While frustrating, it ended up being a blessing in disguise, as I discovered the wonderful &lt;a href=&quot;www.football-data.org&quot;&gt;football-data.org&lt;/a&gt; API. After some testing and implementation, I had a python script that automatically pulled down the latest premier league standings and fixture lists, then stored them in CSVs. I used those CSVs to replace my previous data sets in Tableau Public, then set about the process of getting Tableau Public to automatically refresh.&lt;/p&gt;
+
+&lt;h3 id=&quot;getting-tableau-public-to-refresh-automatically&quot;&gt;Getting Tableau Public to Refresh Automatically&lt;/h3&gt;
+
+&lt;p&gt;I initially tried to find a way to automate my computer, using keyboard commands, to autorefresh Tableau Public. After some extensive googling, I couldn’t find an easy way to do it, so I sought alternatives. I read about Tableau’s Google Sheets API and immediately knew it was the move. Unlike many other Tableau Public connections, the Google Sheets API refreshes every day at 11 am. Since it just pulls the latest data from Google Sheets, if I could figure out a way to keep Google Sheets up to date, I’d have my solution.&lt;/p&gt;
+
+&lt;p&gt;Luckily, I came across this &lt;a href=&quot;http://erikrood.com/Posts/py_gsheets.html&quot;&gt;post&lt;/a&gt; from Erik Rood, that explained how to connect Python to Google Sheets. After downloading the pygsheets package, reading his tutorial, and fiddling with the code, I was able to join my google sheets update code with my football-data API collection code, to make one script capable of doing it all. Once I was able to reliably push my weekly EPL data to google sheets, I replaced the CSV files in my Tableau Public workbook, with the google sheets connection and was just about ready to go.&lt;/p&gt;
+
+&lt;h3 id=&quot;scheduling-it-to-update-weekly&quot;&gt;Scheduling it to Update Weekly&lt;/h3&gt;
+
+&lt;p&gt;The final step to make the process truly automated, was scheduling my python script to run automatically. After some searching, I determined that Launchctl would likely be a more robust solution than Crontab, because it can run &lt;a href=&quot;https://developer.apple.com/library/content/documentation/MacOSX/Conceptual/BPSystemStartup/Chapters/ScheduledJobs.html&quot;&gt;“missed scripts”&lt;/a&gt;, scheduled while my computer is asleep. I found a tutorial on &lt;a href=&quot;http://www.launchd.info/&quot;&gt;launchd.info&lt;/a&gt; describing how to create the file and the different intervals available, then wrote my own to update twice a week, after mid-week and weekend fixtures. I excitedly went to run it, only for it to fail. I tried a number of different troubleshooting methods (shebang lines, working directories, python environments) without success. After a good number of hours, I finally came across this informative &lt;a href=&quot;https://alvinalexander.com/mac-os-x/mac-osx-startup-crontab-launchd-jobs&quot;&gt;tutorial&lt;/a&gt; which suggested using “sudo” to schedule my launch daemon. Once I got it up and running, I watched in delight as my process flowed from start to finish, leaving me with a Tableau Public workbook, sporting the latest Premier League Standings.&lt;/p&gt;
+
+&lt;h3 id=&quot;conclusion&quot;&gt;Conclusion&lt;/h3&gt;
+
+&lt;p&gt;While it only took a few months to get it there, I’m happy to announce the table in my Premier League Team Selection Tool gets automatically updated on a weekly basis. While it may seem trivial, it was a great learning experience, and a highly applicable skillset for future use.&lt;/p&gt;
+
+</description>
+        
+          <description>&lt;h3 id=&quot;updated-post&quot;&gt;Updated Post&lt;/h3&gt;
+&lt;p&gt;&lt;strong&gt;I’ve put together an update to this post that leverages Google Cloud Compute, Google Cloud Scheduler, and cron to truly automate this process&lt;/strong&gt;. While the process below works well if you keep your computer on for each scheduled launch daemon, it doesn’t work well for data that needs to be refreshed more regularly or during off-peak hours. The updated approach does a better job handling these situations and can be found &lt;a href=&quot;http://www.irarickman.com/Automatic-Tableau-Data-Refreshing-Through-Google-Cloud-and-Sheets/&quot;&gt;here&lt;/a&gt;.&lt;/p&gt;
+
+</description>
+        
+        <pubDate>Thu, 07 Dec 2017 00:00:00 +0000</pubDate>
+        <link>http://irarickman.com/blog/Auto-Refreshing-Tableau-Public/</link>
+        <guid isPermaLink="true">http://irarickman.com/blog/Auto-Refreshing-Tableau-Public/</guid>
+        
+        <category>viz</category>
+        
+        <category>google cloud</category>
+        
+        <category>tableau</category>
+        
+        <category>python</category>
+        
+        <category>launchctl</category>
+        
+        
+        <category>data viz</category>
+        
+      </item>
+      
+    
+      
+      <item>
+        <title>Optimizing Bikeshare Rebalancing by Identifying High Priority Stations </title>
+        <description>&lt;p class=&quot;intro&quot;&gt;&lt;span class=&quot;dropcap&quot;&gt;F&lt;/span&gt;or my capstone project to conclude my 12 week Data Science Immersive course at General Assembly, I studied Capital Bikeshare data to identify the highest priority stations for bikeshare rebalancing efforts. In this post, I'll walk through my workflow, methodology, and findings, to demonstrate the locations most sensitive to emptiness. These locations should be prioritized for rebalancing efforts. &lt;/p&gt;
+
+&lt;h3 id=&quot;what-is-capital-bikeshare&quot;&gt;What Is Capital Bikeshare?&lt;/h3&gt;
+
+&lt;p&gt;Capital Bikeshare (CaBi) is a public bikesharing system offering bike rental service within the DC Metro area. The program offers bikes for rental (by single-ride or membership) at 347 stations in DC and Arlington, VA (and more in more distant cities). It was founded in September 2010 and has served over 14.5 million trips, all of which are publicly available for download in an anonymized format.&lt;/p&gt;
+
+&lt;h3 id=&quot;what-is-rebalancing&quot;&gt;What Is Rebalancing?&lt;/h3&gt;
+
+&lt;p&gt;The CaBi system has over 7500 available bike docks across their stations, but has about 3500 bikes in circulation. Even with optimal distribution, the average station will be at 50% capacity. To combat this challenge and ensure bike availability, CaBi “rebalances” bikeshare stations by moving bikes to and from empty and full stations respectively. According to this &lt;a href=&quot;https://www.washingtonpost.com/news/dr-gridlock/wp/2013/08/02/the-army-behind-capital-bikeshares-rebalancing/?utm_term=.b05b64ef2fae&quot;&gt;Washington Post article&lt;/a&gt;, CaBi aims to rebalance empty/full stations within 2 hours. However, knowing which stations will refill through user trips and which will remain empty is a very difficult process to model. Further, it’s a pivotal calculation, since rebalancing is one of the largest operating expenses for CaBi. As such, figuring out which stations to prioritize for rebalancing is paramount.&lt;/p&gt;
+
+&lt;h3 id=&quot;how-can-we-measure-rebalancing-priority&quot;&gt;How Can We Measure Rebalancing Priority?&lt;/h3&gt;
+
+&lt;p&gt;A key aspect of determining which stations to prioritize for rebalancing is understanding the unmet demand for bikes at stations that run out of bikes. While there is no current way to truly measure the number of people who are left tireless, we can try to infer the relative differences between stations, using the change in the rates of bike removal at neighboring stations. For example, in the situation depicted below, if the rate of bikes leaving the four outer stations changes when the center station becomes empty, we can infer that there is unmet demand at that station.&lt;/p&gt;
+
+&lt;figure&gt;
+&lt;img src=&quot;/assets/img/Example Bikes.png&quot; alt=&quot;&quot; /&gt;
+&lt;figcaption&gt; The scenario on the left displays 5 stations with bikes vs. 4 stations with bikes and 1 without bikes on the right. &lt;/figcaption&gt;
+&lt;/figure&gt;
+
+&lt;p&gt;Using the logic above, I set out to identify the stations that have differences in demand for bikes for when they’re empty and not empty as &lt;strong&gt;measured by the average number of bikes leaving the neighboring stations.&lt;/strong&gt;&lt;/p&gt;
+
+&lt;h3 id=&quot;what-data-was-available&quot;&gt;What Data Was Available?&lt;/h3&gt;
+
+&lt;p&gt;To conduct my analysis, I downloaded the anonymized trip data available from &lt;a href=&quot;https://www.capitalbikeshare.com/system-data&quot;&gt;Capital Bikeshare&lt;/a&gt; and accessed their publicly available &lt;a href=&quot;https://www.motivateco.com/use-our-data/&quot;&gt;API&lt;/a&gt; to get the location and capacity of every bikeshare station. The trip dataset contained the variables listed below:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Bike ID&lt;/li&gt;
+  &lt;li&gt;Start Station&lt;/li&gt;
+  &lt;li&gt;End Station&lt;/li&gt;
+  &lt;li&gt;Start Time and Date&lt;/li&gt;
+  &lt;li&gt;End Time and Date&lt;/li&gt;
+  &lt;li&gt;Rental Type (single-ride vs. member)&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Using these variables, I was able to generate a running count of the number of bikes leaving and arriving at each station, in hourly time intervals. I was also able to identify bikes that had been rebalanced from one station to another. If a trip started at a location different than the last end location for that bike, I counted it as a bike rebalanced into the starting station and rebalanced out of the ending station. With my data organized into hourly time intervals by station, I was able to keep a running count of the number of bikes present at each station. However, it was clear that some “rebalanced” bikes were unaccounted for, since the running counts on some stations far exceeded their capacities.&lt;/p&gt;
+
+&lt;h3 id=&quot;how-did-i-work-with-the-data&quot;&gt;How Did I Work With The Data?&lt;/h3&gt;
+
+&lt;p&gt;Given the challenge associated with knowing how many bikes were truly present at a given station, at a given time, I decided to group each station into 6 hour time blocks. Using a running count within those time blocks, I was able to measure the number of bikes taken in/out for rides and in/out for rebalancing. Once I had this status in place, I compared it against the capacity for the station and marked each time block as either full, regular, or empty. Because of the uncertainty of my measurement, I chose a very conservative estimate. I only marked a station empty or full, if the total number of bikes leaving/arriving exceeded the capacity. If this was the case, I could be certain that the station was empty or full. While using such a conservative threshold certainly considered some times when the station was full/empty as regular, it is still a good indicator of the demand for that time period and clearly signifies that many customers were returning/taking out bikes.&lt;/p&gt;
+
+&lt;h3 id=&quot;how-can-we-tell-which-stations-deserve-priority&quot;&gt;How Can We Tell Which Stations Deserve Priority?&lt;/h3&gt;
+
+&lt;p&gt;After generating my dataset of statuses for each station for each 6 hour time block, I added the average hourly rate of bike movement at the four nearest stations for each 6 hour time block, to create a dataset with two columns. Each station contained a status (full, empty, regular) and an average hourly rate. I used the nearest four stations, because CaBi tries to keep all new stations within a quarter mile of another station, and because the average number of stations within .35 miles of a given station is four. I assumed that a 7 minute walk (.35 miles) is the maximum someone would be willing to walk if their closest station was out of bikes. When applying this threshold, 196 of the 229 stations studied had at least one station within .35 miles and more than half had at least 3 stations within .35 miles.&lt;/p&gt;
+
+&lt;figure&gt;
+&lt;img src=&quot;/assets/img/Nearby Stations.png&quot; alt=&quot;&quot; /&gt;
+&lt;figcaption&gt; The distribution of bikeshare stations with neighboring stations within .35 miles&lt;/figcaption&gt;
+&lt;/figure&gt;
+
+&lt;p&gt;I studied 229 stations of the 347 within the DC area because only 229 stations observed at least one six-hour time block within their span of operation that resulted in an empty status. While not perfect, it still indicates that those 229 stations had periods of high demand relative to the remaining stations.&lt;/p&gt;
+
+&lt;p&gt;With a complete dataset in hand, I chose to compare the differences between empty and not for each station through a Bayesian estimation model. In non-data science terms, a Bayesian estimation model is simply a method of estimating the probability of an outcome, based on our prior belief and the data we observe. In this example, our belief is that the rate of bikes leaving neighboring stations is the same for when the station of interest is empty and when it’s not. Using our model, if we find that they are different, then that means the station of interest does see an increase in bikes leaving the neighboring stations when it goes empty vs. when it has bikes.&lt;/p&gt;
+
+&lt;h3 id=&quot;which-stations-should-be-prioritized-for-rebalancing&quot;&gt;Which Stations Should Be Prioritized For Rebalancing?&lt;/h3&gt;
+
+&lt;p&gt;Based on the results of my analysis, 87 of the 229 stations seemed to see an uptick in the number of bikes leaving neighboring stations as a result of emptiness at the origin station. In the visualization below, I display my findings.&lt;/p&gt;
+
+&lt;figure&gt;
+&lt;figcaption&gt; The visualization below shows bikeshare stations that should be prioritized for rebalancing &lt;/figcaption&gt;
+&lt;iframe src=&quot;https://public.tableau.com/views/topublic/BikeshareExplorer?:embed=y&amp;amp;:showVizHome=no&quot; scrolling=&quot;no&quot; width=&quot;2000px&quot; height=&quot;1300px&quot;&gt;
+&lt;/iframe&gt;
+&lt;/figure&gt;
+
+&lt;h3 id=&quot;recommendations&quot;&gt;Recommendations&lt;/h3&gt;
+
+&lt;p&gt;Based on my findings, I noticed that the highest priority stations were ones with a high number of neighboring stations, that run out more than average (but not the most), and have similar rates of bike trips starting and ending. These stations are more likely to see unmet demand when they run empty, as evidenced by an uptick in neighboring station bike trips, so they should be prioritized for rebalancing. In order the top 5 stations were:&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;15th and F St NE&lt;/li&gt;
+  &lt;li&gt;Maryland Ave and  E St NE&lt;/li&gt;
+  &lt;li&gt;15th and W St NW&lt;/li&gt;
+  &lt;li&gt;California St and Florida Ave NW&lt;/li&gt;
+  &lt;li&gt;8th and 0 St NW&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h3 id=&quot;conclusions&quot;&gt;Conclusions&lt;/h3&gt;
+
+&lt;p&gt;While my analysis did include information on existing rebalancing procedures, I do believe that I uncovered some insights on rebalancing. If we performed this analysis on stations irrespective of rebalancing, it would be very clear that the stations that go empty the most should be prioritized for rebalancing. However, with rebalancing in mind and by studying the rates at neighboring stations, we can infer that the stations identified in this analysis are very deserving of rebalancing because their emptiness leads to unmet demand and extra pressure on neighboring stations. Furthermore, those stations typically have equal rates of replacement and removal, so when they do run out, they aren’t likely to see an uptick in replacement, like the more popular stations (Union Station and Dupont Circle) would.&lt;/p&gt;
+
+&lt;p&gt;In summation, there is certainly more analysis to be done, ideally on actual rates of fullness/emptiness. There clearly is some insight to be gained from this form of study and I’m hopeful that it can be used to improve the redistribution of bikes in the future.&lt;/p&gt;
+
+</description>
+        
+          <description>&lt;p class=&quot;intro&quot;&gt;&lt;span class=&quot;dropcap&quot;&gt;F&lt;/span&gt;or my capstone project to conclude my 12 week Data Science Immersive course at General Assembly, I studied Capital Bikeshare data to identify the highest priority stations for bikeshare rebalancing efforts. In this post, I'll walk through my workflow, methodology, and findings, to demonstrate the locations most sensitive to emptiness. These locations should be prioritized for rebalancing efforts. &lt;/p&gt;
+</description>
+        
+        <pubDate>Mon, 11 Sep 2017 00:00:00 +0000</pubDate>
+        <link>http://irarickman.com/blog/Optimizing-Bikeshare-Rebalancing/</link>
+        <guid isPermaLink="true">http://irarickman.com/blog/Optimizing-Bikeshare-Rebalancing/</guid>
+        
+        <category>viz</category>
+        
+        <category>biking</category>
+        
+        <category>DC</category>
+        
+        <category>Bikeshare</category>
+        
+        <category>tableau</category>
+        
+        <category>Bayes</category>
+        
+        <category>data science</category>
+        
+        
+        <category>data viz</category>
+        
+      </item>
+      
+    
+      
+      <item>
+        <title>Visualizing the Bikeshare Stations in Greatest Need of Rebalancing</title>
+        <description>&lt;p class=&quot;intro&quot;&gt;&lt;span class=&quot;dropcap&quot;&gt;T&lt;/span&gt;his post offers a quick breakdown of some of the key findings and insights from my capstone study on the highest priority stations for bikeshare rebalancing efforts. Because Capital Bikeshare has about twice as many docks as bikes, they &quot;rebalance&quot; their docks by moving bikes from full stations to empty stations to redistribute the location of bikes. In a later post, I will more comprehensively detail my methodology and capstone approach, but here I simply mean to display my findings and cover some interesting recommendations. &lt;/p&gt;
+
+&lt;h3 id=&quot;the-findings&quot;&gt;The Findings&lt;/h3&gt;
+
+&lt;p&gt;For my capstone, I looked at the bikeshare stations that have differences in demand for bikes for when they’re empty vs. not, as &lt;strong&gt;measured by the average number of bikes leaving the neighboring stations.&lt;/strong&gt; In my analysis, I built a Bayesian estimation model to determine the differences between empty and not for 229 of 357 DC and Arlington, VA bikeshare stations. I ended up with 87 stations that seemed to see an uptick in the number of bikes leaving neighboring stations as a result of emptiness at the origin station. In the visualization below, I display my findings.&lt;/p&gt;
+
+&lt;figure&gt;
+&lt;figcaption&gt; The visualization below shows bikeshare stations that should be prioritized for rebalancing &lt;/figcaption&gt;
+&lt;iframe src=&quot;https://public.tableau.com/views/topublic/BikeshareExplorer?:embed=y&amp;amp;:showVizHome=no&quot; scrolling=&quot;no&quot; width=&quot;2000px&quot; height=&quot;1300px&quot;&gt;
+&lt;/iframe&gt;
+&lt;/figure&gt;
+
+&lt;h3 id=&quot;recommendations&quot;&gt;Recommendations&lt;/h3&gt;
+
+&lt;p&gt;Based on my findings, I noticed that the highest priority stations were ones with a high number of neighboring stations, that run out more than average (but not the most), and have similar rates of bike trips starting and ending. These stations are more likely to see unmet demand when they run empty, as evidenced by an uptick in neighboring station bike trips, so they should be prioritized for rebalancing. In order the top 5 stations were:&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;15th and F St NE&lt;/li&gt;
+  &lt;li&gt;Maryland Ave and  E St NE&lt;/li&gt;
+  &lt;li&gt;15th and W St NW&lt;/li&gt;
+  &lt;li&gt;California St and Florida Ave NW&lt;/li&gt;
+  &lt;li&gt;8th and 0 St NW&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;In my next post, I’ll detail my study in depth and discuss the practical application and next steps for Capital Bikeshare.&lt;/p&gt;
+</description>
+        
+          <description>&lt;p class=&quot;intro&quot;&gt;&lt;span class=&quot;dropcap&quot;&gt;T&lt;/span&gt;his post offers a quick breakdown of some of the key findings and insights from my capstone study on the highest priority stations for bikeshare rebalancing efforts. Because Capital Bikeshare has about twice as many docks as bikes, they &quot;rebalance&quot; their docks by moving bikes from full stations to empty stations to redistribute the location of bikes. In a later post, I will more comprehensively detail my methodology and capstone approach, but here I simply mean to display my findings and cover some interesting recommendations. &lt;/p&gt;
+</description>
+        
+        <pubDate>Fri, 08 Sep 2017 00:00:00 +0000</pubDate>
+        <link>http://irarickman.com/blog/Bikeshare-Reblancing-Viz/</link>
+        <guid isPermaLink="true">http://irarickman.com/blog/Bikeshare-Reblancing-Viz/</guid>
+        
+        <category>viz</category>
+        
+        <category>biking</category>
+        
+        <category>DC</category>
+        
+        <category>Bikeshare</category>
+        
+        <category>tableau</category>
+        
+        
+        <category>data viz</category>
+        
+      </item>
+      
+    
+      
+      <item>
+        <title>Am I Late to the Great British Baking Party?</title>
+        <description>&lt;p class=&quot;intro&quot;&gt;&lt;span class=&quot;dropcap&quot;&gt;A&lt;/span&gt; few months ago, I was introduced to the magic that is The Great British Bake Off. Currently in its 8th season, the show is quite simple. Twelve of the best amateur bakers in the United Kingdom, come together each weekend to compete in an elimination style baking competition, to win the coveted title of UK's best amateur baker and the spoils that come with it ... aka a cake stand. While at first glance the show is pretty bland, the bakes prove to be anything bundt so. &lt;/p&gt;
+
+&lt;p&gt;In what can best be described as a perfectly British mix of pleasantries, baking, and cheeky humour, the show just seemed to subtly grab my attention, and before I knew it I was hooked. Since I started watching on Netflix, and the show had clearly been around a while, I wondered, was I late to the Bake Off?&lt;/p&gt;
+
+&lt;h3 id=&quot;popularity-in-the-us&quot;&gt;Popularity in the US&lt;/h3&gt;
+
+&lt;p&gt;As a good data science practitioner, I decided to answer the question with a chart. Using Google’s &lt;a href=&quot;https://trends.google.com/trends/&quot;&gt;trend search&lt;/a&gt; I was able to see exactly when the show started to become popular in the US. While I consider myself “pop culture aware”, I certainly was not an early adopter in this instance.&lt;/p&gt;
+
+&lt;figure&gt;
+&lt;figcaption&gt; Relative search popularity of Great British Bakeoff in the United States &lt;/figcaption&gt;
+&lt;img src=&quot;/assets/img/GBBO.png&quot; alt=&quot;&quot; /&gt;
+&lt;/figure&gt;
+
+&lt;p&gt;The first major spike in February 2015 appears to be the result of a &lt;a href=&quot;http://www.mirror.co.uk/tv/tv-news/mary-berry-chokes-zoellas-cake-5189107&quot;&gt;taste test gone wrong&lt;/a&gt;. The next major spike in October 2015 appears to be finale of the show’s fifth season, which was the second one aired on PBS in the US. The following spike in September 2016 appears to be the result of longtime host Mary Berry’s announcement that she was &lt;a href=&quot;http://money.cnn.com/2016/09/22/media/bake-off-show-mary-berry/index.html&quot;&gt;leaving the show&lt;/a&gt;. The last and most significant spike in March 2017 seems to be in response to the announcement of the &lt;a href=&quot;http://www.bbc.com/news/entertainment-arts-39296513&quot;&gt;new hosts and judge&lt;/a&gt;. Given that this spike was the highest, the show is clearly more popular now than ever before. While I can certainly attribute the increased &lt;a href=&quot;https://www.buzzfeed.com/scottybryan/norman-really-likes-exotic-pesto?utm_term=.lgXkeAxY9d#.uvMzv1BKR8&quot;&gt;complexity&lt;/a&gt; of my baking to GBBO, I can’t say that I can attribute the show’s rise to my early adopter status.&lt;/p&gt;
+
+</description>
+        
+          <description>&lt;p class=&quot;intro&quot;&gt;&lt;span class=&quot;dropcap&quot;&gt;A&lt;/span&gt; few months ago, I was introduced to the magic that is The Great British Bake Off. Currently in its 8th season, the show is quite simple. Twelve of the best amateur bakers in the United Kingdom, come together each weekend to compete in an elimination style baking competition, to win the coveted title of UK's best amateur baker and the spoils that come with it ... aka a cake stand. While at first glance the show is pretty bland, the bakes prove to be anything bundt so. &lt;/p&gt;
+</description>
+        
+        <pubDate>Fri, 01 Sep 2017 00:00:00 +0000</pubDate>
+        <link>http://irarickman.com/blog/Great-British-Bake-Off/</link>
+        <guid isPermaLink="true">http://irarickman.com/blog/Great-British-Bake-Off/</guid>
+        
+        <category>viz</category>
+        
+        <category>baking</category>
+        
+        <category>Great Britain</category>
+        
+        
+        <category>data viz</category>
+        
+      </item>
+      
+    
+      
+      <item>
+        <title>Building a Premier League Clustering Model</title>
+        <description>&lt;p class=&quot;intro&quot;&gt;&lt;span class=&quot;dropcap&quot;&gt;I&lt;/span&gt;n my previous post, I introduced my Premier League Team selection tool, used to match MLB fans with Premier League teams. In this post, I detail the data collection, analytical approach, and visualization techniques I used to create the visualization. &lt;/p&gt;
+
+&lt;h3 id=&quot;initial-data-collection&quot;&gt;Initial Data Collection&lt;/h3&gt;
+
+&lt;p&gt;To perform this analysis, I collected data on the following characteristics of both EPL and MLB teams:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Weighted average of team record for the past 25 years&lt;/li&gt;
+  &lt;li&gt;Number of titles and runner-up finishes in team history&lt;/li&gt;
+  &lt;li&gt;Number of player awards won in team history &lt;em&gt;(EPL: PFA Player of the Year and Young Player of the Year, MLB: MVPs and Cy Youngs)&lt;/em&gt;&lt;/li&gt;
+  &lt;li&gt;Age of Stadium&lt;/li&gt;
+  &lt;li&gt;Stadium Capacity&lt;/li&gt;
+  &lt;li&gt;Average price of a beer at the stadium&lt;/li&gt;
+  &lt;li&gt;Previous season’s offensive and defensive metrics &lt;em&gt;(EPL: Goals Scored/Allowed, MLB: Offensive WAR and Pitching WAR)&lt;/em&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Gathering data and cleaning it for analysis proved to be the most time consuming aspect of this project. Since I set out to compare MLB teams to Premier League teams, I wanted to ensure consistency of data and continuity of observations. I gathered most of my baseball data from BaseballReference.com, Wikipedia, and a study on MLB fan costs. Most of my EPL data came from Wikipedia, PremierLeague.com, and a Daily Mirror fan cost study. I used a combination of data downloads and web scraping to gather the data.&lt;/p&gt;
+
+&lt;h3 id=&quot;data-preparation&quot;&gt;Data Preparation&lt;/h3&gt;
+
+&lt;p&gt;After gathering all the data, I performed a considerable amount of data cleaning and transformation to prepare for analysis. One major challenge was handling missing seasons in the previous 25 years for both MLB teams (as a result of new teams) and EPL teams (as a result of promotion/relegation). To handle these seasons, I simply assigned each season the minimum team win percentage in baseball and the minimum number of points in EPL in their respective leagues. Next, I put all team names in a standard format and converted them to the appropriate data type. Once I’d finally gotten the data sets in the right format, I merged them together to create one data frame for MLB teams and one for EPL teams. With my prepared data frames in place, I was ready to perform data analysis.&lt;/p&gt;
+
+&lt;h3 id=&quot;modeling-approach&quot;&gt;Modeling Approach&lt;/h3&gt;
+
+&lt;p&gt;Unsupervised learning involves grouping data without knowing in which class it belongs. When performing more traditional data science, we know what class we want to predict. For example, if I want to predict which MLB teams make the playoffs, I’ll build a model using the historical stats of teams that did and did not make the playoffs. In this case, since we don’t already know how MLB teams and EPL teams are similar, we don’t already know what we want to predict.&lt;/p&gt;
+
+&lt;p&gt;While it’s true I could build a model to predict MLB teams based on the data I collected, then apply this model to Premier League teams, I feared three downsides:&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;I might not be able to accurately predict MLB teams, which would result in a bad model for EPL teams&lt;/li&gt;
+  &lt;li&gt;Since there are 30 MLB teams, even with a perfect 1:1 match, 10 MLB teams would not have a companion EPL team&lt;/li&gt;
+  &lt;li&gt;Given the nature of sports leagues, there are often many middle of the pack teams, so predicting based on my data might have assigned a significant number of teams to a small number of teams.&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;For these reasons, I decided to rely on unsupervised learning, to instead group “like” MLB teams, then apply that model to EPL teams to see how they fit the groupings. Performing this sort of grouping proved challenging as well, as I’ll detail further.&lt;/p&gt;
+
+&lt;h3 id=&quot;building-a-clustering-model&quot;&gt;Building a Clustering Model&lt;/h3&gt;
+
+&lt;p&gt;While there are a few forms of unsupervised learning techniques, I decided to focus on clustering. Clustering involves grouping observations based on the distance between each of their variables. There are different ways to determine the groupings, but in general, we measure the effectiveness of clustering by the density of clusters (how close the observations in each cluster are to each other) and the distance between clusters (how far each cluster is from the other clusters).&lt;/p&gt;
+
+&lt;p&gt;When clusters are easily separable, this can be simple, for example, grouping EPL players by their positions. Based on stats on where players spend time on the pitch, it will likely be easy to classify players into positions. However, for data without easily separable clusters, it can be challenging to separate classes in a meaningful way.&lt;/p&gt;
+
+&lt;p&gt;To build my clustering model, I tried three approaches: K-Means Clustering, DBSCAN, and Hierarchical Clustering.&lt;/p&gt;
+
+&lt;h4 id=&quot;k-means-clustering&quot;&gt;K-Means Clustering&lt;/h4&gt;
+&lt;p&gt;K-Means Clustering works by grouping clusters based on the distance from some number of k points, then iterating until the optimized distance between points is achieved. In K-Means clustering, a number of groups is selected, and the model will separate them into groups algorithmically. Since I didn’t know exactly how many groups I wanted, I tried varying numbers until I found a number of clusters that did a good job of separating the data, but balanced cluster density. K-Means gave me 8 clusters, which seemed to be a good method of dispersion.&lt;/p&gt;
+
+&lt;h4 id=&quot;dbscan&quot;&gt;DBSCAN&lt;/h4&gt;
+&lt;p&gt;DBSCAN stands for Density-based spatial clustering of applications with noise and is another clustering technique. DBSCAN arrives at a number of clusters using its algorithmic approach, measuring the distance between observations and other observations. When observations are within the radial distance of other observations and meet a minimum neighboring threshold, they are grouped into the same cluster. When one cluster runs out, the algorithm generates a new cluster. This process continues until every observation has been clustered or determined to be too far from other observations to assign to a cluster. I tried varying inputs for the radial distance and minimum number of points for MLB teams, but wasn’t able to group teams to more than 3 groups.&lt;/p&gt;
+
+&lt;h4 id=&quot;hierarchical-clustering&quot;&gt;Hierarchical Clustering&lt;/h4&gt;
+&lt;p&gt;In Hierarchical Clustering, a mapping of the distances between each observation and the other observations is created. This web is organized into a decision tree-like graph, that converges with each observation grouped together at it’s end. This graph is called a dendogram and helps visualize how far each observation is from the other points. From there, a threshold between groups must be decided and much like in K-Means Clustering, clusters can be separated by selecting a number. However, with Hierarchical clustering, a distance is specified, which can somewhat arbitrarily leave observations in disparate groups. Furthermore, Hierarchical Clustering typically works best in situations where there is a distribution between observations. For example, if we wanted to cluster all English clubs that participate in the FA Cup, we might use Hierarchical Clustering, since it would better group the clubs in each division.&lt;/p&gt;
+
+&lt;h3 id=&quot;choosing-a-clustering-model&quot;&gt;Choosing a Clustering Model&lt;/h3&gt;
+
+&lt;p&gt;After running through each model, I decided to go with K-Means using a k of 8 since K-Means ensured the best spread of clusters with the most practical application. While the density and separation metrics may have been slightly better with other k options and other techniques, clustering metrics are meant to be used as guidelines, not rules. With that in mind, 8 clusters did the best job of separating as many MLB teams and EPL teams as possible.&lt;/p&gt;
+
+&lt;p&gt;While unsupervised learning can sometimes be inexact, my groupings certainly pass the eye test (Yankees and ManU) so I feel confident in their conclusiveness.&lt;/p&gt;
+
+&lt;h3 id=&quot;visualization-structure&quot;&gt;Visualization Structure&lt;/h3&gt;
+
+&lt;p&gt;Given that the teams in my analysis are based in cities, I knew I wanted to incorporate a map in some way. While people often want to use maps because they think they’re cool (which let’s be real is true), it’s important to consider if it will actually add to the analysis. In this case, I considered using maps for both MLB and EPL. However, I decided to use a map only for the EPL and not the MLB, with my rationale being that for my audience of MLB fans, using a map of the US would not add any new information, but a map of the UK would. Knowing exactly where an EPL team is located visually, adds an important element of information that can help a user better understand the team they’ve selected.&lt;/p&gt;
+
+&lt;p&gt;Since the EPL teams are meant to be the focus of the visualization, but need to be narrowed through the MLB teams, I made sure they consumed the majority of the space. The bottom three quarters of the visualization feature the EPL teams, with the middle two quarters, dedicated to team exploration. With the top quarter, I decided to display MLB teams in a scrollbar style, to simplify the experience for the user and clearly indicate that selecting an MLB team would flow down screen to narrowed choices for EPL teams. Choosing an EPL team in the map, provides a tidy overview of the club and it’s characteristics in the left side bar, and allows a user to quickly learn about clubs. Lastly, the live table at the bottom provides additional context on the quality of the selected club.&lt;/p&gt;
+
+&lt;h3 id=&quot;building-the-visualization&quot;&gt;Building the Visualization&lt;/h3&gt;
+
+&lt;p&gt;To construct the visualization, I had two main time-consuming tasks. The first was connecting logos to teams from both leagues and the second was displaying the geographical locations of each club in a meaningful way.&lt;/p&gt;
+
+&lt;h4 id=&quot;showing-team-logos&quot;&gt;Showing Team Logos&lt;/h4&gt;
+&lt;p&gt;To address the logos challenge, I had to save each logo to the folder on my computer that contains Tableau Shapes (Documents/My Tableau Repository/Shapes), then assign them appropriately.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/img/MLB Logos.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;I went through a similar process for the EPL teams, with one additional step. To display the team logos in their own sheet, in high resolution, for Tableau Public, I had to set the logos as the background, conditional on the selection. To do this, I created calculated fields “X” and “Y” and set them equal to 1. Next, I went to Map&amp;gt;Background Images and selected my data source. When the menu popped up, I selected “Add Image” and began the process of adding each team logo. To add a logo, I added the file by clicking “Browse” and linking to the file. then I added the calculated field “X” to the X field axis and “Y” to the Y field axis. I set the minimums equal to 0 and maximums equal to 1. This ensures that background image scales properly. Lastly, I clicked on “Options”, and checked “Always Show Entire Image”, then hit “Add”. There, I chose the EPL team field, and chose the team for my selected logo. This ensured that that specific logo, only shows when that specific team is selected. I proceeded to complete these steps for each team until I had all the logos set up.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/img/Liverpool.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;h4 id=&quot;displaying-geographical-location&quot;&gt;Displaying Geographical Location&lt;/h4&gt;
+&lt;p&gt;While many of the teams had their city attached to them, for a few cities, the location was ambiguous or overlapped another team. For example, in London there are 6 teams in the greater metro area. To display their logos without overlapping each other, I manually entered the latitudes and longitudes of each stadium, ensuring that the logos wouldn’t overlap each other. To do this, I clicked on Map&amp;gt;Edit Locations, then manually inputted the coordinates for the appropriate stadiums.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/img/Locations.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;h3 id=&quot;updating-the-league-table&quot;&gt;Updating the League Table&lt;/h3&gt;
+
+&lt;p&gt;The last step to complete my visualization was setting up the live data table. It’s not truly live, but it is automatically refreshed every Thursday, using a combination of the &lt;a href=&quot;http://www.football-data.org/documentation&quot;&gt;Football Data&lt;/a&gt; and Google Sheets. Thanks to the Tableau Google Sheets connection, the visualization automatically updates every day at 11 am.&lt;/p&gt;
+
+&lt;h3 id=&quot;conclusion&quot;&gt;Conclusion&lt;/h3&gt;
+
+&lt;p&gt;The entire project took me the better part of two weeks to complete, with much of my time spent on data collection and preparation. While it was time intensive, I thoroughly enjoyed the process and challenge. Further, I learned a few cool pandas tricks and honed my web scraping skills. I also learned a great deal about clustering, which will serve me well in the future. Lastly, I always enjoy working in Tableau and this time was no different. Each time I use it, I get better at structuring my visualizations and adding new features.&lt;/p&gt;
+
+&lt;p&gt;As mentioned previously, MLB is only the first league I plan to incorporate and I hope to update this post in the future with a new post on teams from another Big 4 American Sports League.&lt;/p&gt;
+
+</description>
+        
+          <description>&lt;p class=&quot;intro&quot;&gt;&lt;span class=&quot;dropcap&quot;&gt;I&lt;/span&gt;n my previous post, I introduced my Premier League Team selection tool, used to match MLB fans with Premier League teams. In this post, I detail the data collection, analytical approach, and visualization techniques I used to create the visualization. &lt;/p&gt;
+</description>
+        
+        <pubDate>Mon, 21 Aug 2017 00:00:00 +0000</pubDate>
+        <link>http://irarickman.com/blog/Building-a-Premier-League-Clustering-Model/</link>
+        <guid isPermaLink="true">http://irarickman.com/blog/Building-a-Premier-League-Clustering-Model/</guid>
+        
+        <category>viz</category>
+        
+        <category>epl</category>
+        
+        <category>soccer</category>
+        
+        <category>premier league</category>
+        
+        <category>clustering</category>
+        
+        <category>data science</category>
+        
+        
+        <category>clustering</category>
+        
+      </item>
+      
+    
+  </channel>
+</rss>
