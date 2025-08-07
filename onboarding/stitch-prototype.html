@@ -41,20 +41,109 @@
           <h2>Data Connections</h2>
           <button class="add-source-btn">Add data source</button>
           
-          <div class="connections-list">
-            <div class="connection-item">
-              <i class="fab fa-snowflake"></i>
-              <div class="connection-info">
-                <h3>Snowflake</h3>
-                <p>Last updated: 2 days ago</p>
+          <div class="connections-grid">
+            <!-- Grid Header -->
+            <div class="grid-header">
+              <div class="header-cell">Connection</div>
+              <div class="header-cell">Tables</div>
+            </div>
+            
+            <!-- Grid Data -->
+            <div class="grid-data">
+              <!-- Snowflake Connection -->
+              <div class="grid-row" data-connection-type="database" data-connection="snowflake">
+                <div class="connection-cell">
+                  <div class="connection-icon"><i class="fab fa-snowflake"></i></div>
+                  <div class="connection-details">
+                    <h3 class="connection-name">Snowflake</h3>
+                    <p>Last updated: 2 days ago</p>
+                  </div>
+                </div>
+                <div class="tables-cell">
+                  <span class="table-count">8</span>
+                </div>
+              </div>
+              
+              <!-- AWS S3 Connection -->
+              <div class="grid-row" data-connection-type="file" data-connection="s3">
+                <div class="connection-cell">
+                  <div class="connection-icon"><i class="fab fa-aws"></i></div>
+                  <div class="connection-details">
+                    <h3 class="connection-name">AWS S3</h3>
+                    <p>Last updated: 1 week ago</p>
+                  </div>
+                </div>
+                <div class="tables-cell">
+                  <span class="table-count">4</span>
+                </div>
+              </div>
+              
+              <!-- Databricks Connection -->
+              <div class="grid-row" data-connection-type="database" data-connection="databricks">
+                <div class="connection-cell">
+                  <div class="connection-icon"><i class="fas fa-laptop-code"></i></div>
+                  <div class="connection-details">
+                    <h3 class="connection-name">Databricks</h3>
+                    <p>Last updated: 3 days ago</p>
+                  </div>
+                </div>
+                <div class="tables-cell">
+                  <span class="table-count">6</span>
+                </div>
+              </div>
+              
+              <!-- BigQuery Connection -->
+              <div class="grid-row" data-connection-type="database" data-connection="bigquery">
+                <div class="connection-cell">
+                  <div class="connection-icon"><i class="fab fa-google"></i></div>
+                  <div class="connection-details">
+                    <h3 class="connection-name">Google BigQuery</h3>
+                    <p>Last updated: 5 days ago</p>
+                  </div>
+                </div>
+                <div class="tables-cell">
+                  <span class="table-count">5</span>
+                </div>
+              </div>
+              
+              <!-- Azure Blob Connection -->
+              <div class="grid-row" data-connection-type="file" data-connection="azure">
+                <div class="connection-cell">
+                  <div class="connection-icon"><i class="fab fa-microsoft"></i></div>
+                  <div class="connection-details">
+                    <h3 class="connection-name">Azure Blob</h3>
+                    <p>Last updated: 2 weeks ago</p>
+                  </div>
+                </div>
+                <div class="tables-cell">
+                  <span class="table-count">3</span>
+                </div>
+              </div>
+              
+              <!-- SFTP Connection -->
+              <div class="grid-row" data-connection-type="file" data-connection="sftp">
+                <div class="connection-cell">
+                  <div class="connection-icon"><i class="fas fa-server"></i></div>
+                  <div class="connection-details">
+                    <h3 class="connection-name">SFTP</h3>
+                    <p>Last updated: 1 month ago</p>
+                  </div>
+                </div>
+                <div class="tables-cell">
+                  <span class="table-count">2</span>
+                </div>
               </div>
             </div>
-            <div class="connection-item">
-              <i class="fab fa-aws"></i>
-              <div class="connection-info">
-                <h3>AWS S3</h3>
-                <p>Last updated: 1 week ago</p>
-              </div>
+          </div>
+          
+          <!-- Connection Detail View (shows when a connection is clicked) -->
+          <div class="connection-detail-view" style="display: none;">
+            <div class="detail-header">
+              <button class="back-button"><i class="fas fa-arrow-left"></i> Back to connections</button>
+              <h3 class="detail-title">Connection Name</h3>
+            </div>
+            <div class="detail-content">
+              <!-- Will be populated by JavaScript -->
             </div>
           </div>
         </div>
@@ -330,6 +419,276 @@
       </div>
       <div class="modal-body">
         <div class="loading-spinner"></div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Database Tables Modal -->
+  <div class="modal" id="database-tables-modal">
+    <div class="modal-content modal-lg">
+      <div class="modal-header">
+        <h2>Database Tables</h2>
+        <span class="close-modal">&times;</span>
+      </div>
+      <div class="modal-body">
+        <div class="modal-connection-info">
+          <div class="connection-icon"></div>
+          <div class="connection-name"></div>
+        </div>
+        <div class="search-container">
+          <input type="text" placeholder="Search tables..." id="table-search">
+        </div>
+        <div class="tables-grid">
+          <div class="tables-header">
+            <div class="table-header-cell">Table Name</div>
+            <div class="table-header-cell">Schema</div>
+            <div class="table-header-cell">Rows</div>
+            <div class="table-header-cell">Last Updated</div>
+          </div>
+          <div class="tables-list" id="snowflake-tables">
+            <div class="table-row">
+              <div class="table-cell">customer_data</div>
+              <div class="table-cell">public</div>
+              <div class="table-cell">42,583</div>
+              <div class="table-cell">2 days ago</div>
+            </div>
+            <div class="table-row">
+              <div class="table-cell">order_history</div>
+              <div class="table-cell">sales</div>
+              <div class="table-cell">156,281</div>
+              <div class="table-cell">2 days ago</div>
+            </div>
+            <div class="table-row">
+              <div class="table-cell">product_catalog</div>
+              <div class="table-cell">products</div>
+              <div class="table-cell">8,492</div>
+              <div class="table-cell">1 week ago</div>
+            </div>
+            <div class="table-row">
+              <div class="table-cell">user_accounts</div>
+              <div class="table-cell">public</div>
+              <div class="table-cell">39,204</div>
+              <div class="table-cell">2 days ago</div>
+            </div>
+            <div class="table-row">
+              <div class="table-cell">website_visits</div>
+              <div class="table-cell">analytics</div>
+              <div class="table-cell">4,982,103</div>
+              <div class="table-cell">3 days ago</div>
+            </div>
+            <div class="table-row">
+              <div class="table-cell">email_campaigns</div>
+              <div class="table-cell">marketing</div>
+              <div class="table-cell">254</div>
+              <div class="table-cell">5 days ago</div>
+            </div>
+            <div class="table-row">
+              <div class="table-cell">shipping_details</div>
+              <div class="table-cell">logistics</div>
+              <div class="table-cell">129,385</div>
+              <div class="table-cell">4 days ago</div>
+            </div>
+            <div class="table-row">
+              <div class="table-cell">payment_info</div>
+              <div class="table-cell">finance</div>
+              <div class="table-cell">147,892</div>
+              <div class="table-cell">2 days ago</div>
+            </div>
+          </div>
+          <div class="tables-list" id="databricks-tables" style="display: none;">
+            <div class="table-row">
+              <div class="table-cell">customer_profiles</div>
+              <div class="table-cell">default</div>
+              <div class="table-cell">37,294</div>
+              <div class="table-cell">3 days ago</div>
+            </div>
+            <div class="table-row">
+              <div class="table-cell">transaction_data</div>
+              <div class="table-cell">sales</div>
+              <div class="table-cell">203,485</div>
+              <div class="table-cell">3 days ago</div>
+            </div>
+            <div class="table-row">
+              <div class="table-cell">inventory_status</div>
+              <div class="table-cell">warehouse</div>
+              <div class="table-cell">12,839</div>
+              <div class="table-cell">1 week ago</div>
+            </div>
+            <div class="table-row">
+              <div class="table-cell">loyalty_program</div>
+              <div class="table-cell">marketing</div>
+              <div class="table-cell">28,395</div>
+              <div class="table-cell">4 days ago</div>
+            </div>
+            <div class="table-row">
+              <div class="table-cell">site_analytics</div>
+              <div class="table-cell">web</div>
+              <div class="table-cell">3,489,274</div>
+              <div class="table-cell">3 days ago</div>
+            </div>
+            <div class="table-row">
+              <div class="table-cell">customer_support</div>
+              <div class="table-cell">service</div>
+              <div class="table-cell">78,392</div>
+              <div class="table-cell">5 days ago</div>
+            </div>
+          </div>
+          <div class="tables-list" id="bigquery-tables" style="display: none;">
+            <div class="table-row">
+              <div class="table-cell">users</div>
+              <div class="table-cell">analytics</div>
+              <div class="table-cell">45,382</div>
+              <div class="table-cell">5 days ago</div>
+            </div>
+            <div class="table-row">
+              <div class="table-cell">events</div>
+              <div class="table-cell">analytics</div>
+              <div class="table-cell">2,593,284</div>
+              <div class="table-cell">5 days ago</div>
+            </div>
+            <div class="table-row">
+              <div class="table-cell">purchases</div>
+              <div class="table-cell">ecommerce</div>
+              <div class="table-cell">189,372</div>
+              <div class="table-cell">1 week ago</div>
+            </div>
+            <div class="table-row">
+              <div class="table-cell">marketing_campaigns</div>
+              <div class="table-cell">marketing</div>
+              <div class="table-cell">387</div>
+              <div class="table-cell">1 week ago</div>
+            </div>
+            <div class="table-row">
+              <div class="table-cell">customer_feedback</div>
+              <div class="table-cell">support</div>
+              <div class="table-cell">42,893</div>
+              <div class="table-cell">6 days ago</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- File Connection Config Modal -->
+  <div class="modal" id="file-config-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Connection Configuration</h2>
+        <span class="close-modal">&times;</span>
+      </div>
+      <div class="modal-body">
+        <div class="modal-connection-info">
+          <div class="connection-icon"></div>
+          <div class="connection-name"></div>
+        </div>
+        
+        <div class="config-section" id="s3-config" style="display: none;">
+          <h3>AWS S3 Configuration</h3>
+          <div class="config-group">
+            <div class="config-item">
+              <label>Bucket Name:</label>
+              <div class="config-value">amperity-customer-data</div>
+            </div>
+            <div class="config-item">
+              <label>Region:</label>
+              <div class="config-value">us-west-2</div>
+            </div>
+            <div class="config-item">
+              <label>Path Prefix:</label>
+              <div class="config-value">/exports/</div>
+            </div>
+          </div>
+          
+          <h3>Files</h3>
+          <div class="files-list">
+            <div class="file-item">
+              <div class="file-icon"><i class="far fa-file-csv"></i></div>
+              <div class="file-name">customer_export_20240805.csv</div>
+              <div class="file-size">24.5 MB</div>
+            </div>
+            <div class="file-item">
+              <div class="file-icon"><i class="far fa-file-csv"></i></div>
+              <div class="file-name">orders_20240805.csv</div>
+              <div class="file-size">152.7 MB</div>
+            </div>
+            <div class="file-item">
+              <div class="file-icon"><i class="far fa-file-csv"></i></div>
+              <div class="file-name">products_catalog.csv</div>
+              <div class="file-size">5.3 MB</div>
+            </div>
+            <div class="file-item">
+              <div class="file-icon"><i class="far fa-file-csv"></i></div>
+              <div class="file-name">transactions_20240802.csv</div>
+              <div class="file-size">87.9 MB</div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="config-section" id="azure-config" style="display: none;">
+          <h3>Azure Blob Configuration</h3>
+          <div class="config-group">
+            <div class="config-item">
+              <label>Storage Account:</label>
+              <div class="config-value">amperitydatastorage</div>
+            </div>
+            <div class="config-item">
+              <label>Container:</label>
+              <div class="config-value">customer-data</div>
+            </div>
+            <div class="config-item">
+              <label>Path:</label>
+              <div class="config-value">/weekly-exports/</div>
+            </div>
+          </div>
+          
+          <h3>Files</h3>
+          <div class="files-list">
+            <div class="file-item">
+              <div class="file-icon"><i class="far fa-file-csv"></i></div>
+              <div class="file-name">customer_data_export.csv</div>
+              <div class="file-size">18.7 MB</div>
+            </div>
+            <div class="file-item">
+              <div class="file-icon"><i class="far fa-file-csv"></i></div>
+              <div class="file-name">purchase_history.csv</div>
+              <div class="file-size">97.2 MB</div>
+            </div>
+            <div class="file-item">
+              <div class="file-icon"><i class="far fa-file-csv"></i></div>
+              <div class="file-name">support_tickets.csv</div>
+              <div class="file-size">12.4 MB</div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="config-section" id="sftp-config" style="display: none;">
+          <h3>SFTP Configuration</h3>
+          <div class="config-group">
+            <div class="config-item">
+              <label>Host:</label>
+              <div class="config-value">sftp.companyserver.com</div>
+            </div>
+            <div class="config-item">
+              <label>Directory:</label>
+              <div class="config-value">/exports/monthly/</div>
+            </div>
+          </div>
+          
+          <h3>Files</h3>
+          <div class="files-list">
+            <div class="file-item">
+              <div class="file-icon"><i class="far fa-file-csv"></i></div>
+              <div class="file-name">customer_records.csv</div>
+              <div class="file-size">15.8 MB</div>
+            </div>
+            <div class="file-item">
+              <div class="file-icon"><i class="far fa-file-csv"></i></div>
+              <div class="file-name">transaction_history.csv</div>
+              <div class="file-size">34.2 MB</div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>

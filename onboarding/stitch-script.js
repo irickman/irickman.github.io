@@ -11,6 +11,8 @@ document.addEventListener('DOMContentLoaded', function() {
   const pkModal = document.getElementById('pk-modal');
   const semanticsModal = document.getElementById('semantics-modal');
   const runningStitchModal = document.getElementById('running-stitch-modal');
+  const databaseTablesModal = document.getElementById('database-tables-modal');
+  const fileConfigModal = document.getElementById('file-config-modal');
   const closeButtons = document.querySelectorAll('.close-modal');
 
   // Buttons and interactive elements
@@ -23,6 +25,10 @@ document.addEventListener('DOMContentLoaded', function() {
   const eventsTab = document.querySelector('[data-subtab="events"]');
   const cleaningRules = document.querySelectorAll('.cleaning-rule');
   const transformationOptions = document.querySelectorAll('.option');
+  const connectionsGrid = document.querySelector('.connections-grid');
+  const gridRows = document.querySelectorAll('.grid-row');
+  const connectionDetailView = document.querySelector('.connection-detail-view');
+  const backButton = document.querySelector('.back-button');
 
   // Main tab navigation
   navTabs.forEach(tab => {
@@ -234,4 +240,81 @@ document.addEventListener('DOMContentLoaded', function() {
       closeAllModals();
     }
   });
+  
+  // Connection grid row click handler
+  gridRows.forEach(row => {
+    row.addEventListener('click', () => {
+      const connectionType = row.getAttribute('data-connection-type');
+      const connectionName = row.getAttribute('data-connection');
+      const connectionDisplayName = row.querySelector('.connection-name').textContent;
+      const connectionIcon = row.querySelector('.connection-icon i').cloneNode(true);
+      
+      if (connectionType === 'database') {
+        // Show database tables modal
+        const modalConnectionInfo = databaseTablesModal.querySelector('.modal-connection-info');
+        modalConnectionInfo.querySelector('.connection-icon').innerHTML = '';
+        modalConnectionInfo.querySelector('.connection-icon').appendChild(connectionIcon);
+        modalConnectionInfo.querySelector('.connection-name').textContent = connectionDisplayName;
+        
+        // Hide all table lists first
+        const tableLists = databaseTablesModal.querySelectorAll('.tables-list');
+        tableLists.forEach(list => list.style.display = 'none');
+        
+        // Show the appropriate tables list
+        const tablesList = databaseTablesModal.querySelector(`#${connectionName}-tables`);
+        if (tablesList) {
+          tablesList.style.display = 'block';
+        }
+        
+        showModal(databaseTablesModal);
+      } else if (connectionType === 'file') {
+        // Show file configuration modal
+        const modalConnectionInfo = fileConfigModal.querySelector('.modal-connection-info');
+        modalConnectionInfo.querySelector('.connection-icon').innerHTML = '';
+        modalConnectionInfo.querySelector('.connection-icon').appendChild(connectionIcon);
+        modalConnectionInfo.querySelector('.connection-name').textContent = connectionDisplayName;
+        
+        // Hide all config sections first
+        const configSections = fileConfigModal.querySelectorAll('.config-section');
+        configSections.forEach(section => section.style.display = 'none');
+        
+        // Show the appropriate config section
+        const configSection = fileConfigModal.querySelector(`#${connectionName}-config`);
+        if (configSection) {
+          configSection.style.display = 'block';
+        }
+        
+        showModal(fileConfigModal);
+      }
+    });
+  });
+  
+  // Table search functionality
+  const tableSearch = document.getElementById('table-search');
+  if (tableSearch) {
+    tableSearch.addEventListener('input', function() {
+      const searchQuery = this.value.toLowerCase();
+      const visibleTablesList = document.querySelector('.tables-list[style="display: block"]') || document.querySelector('.tables-list:not([style="display: none"])');
+      
+      if (visibleTablesList) {
+        const tableRows = visibleTablesList.querySelectorAll('.table-row');
+        tableRows.forEach(row => {
+          const tableName = row.querySelector('.table-cell').textContent.toLowerCase();
+          if (tableName.includes(searchQuery)) {
+            row.style.display = 'grid';
+          } else {
+            row.style.display = 'none';
+          }
+        });
+      }
+    });
+  }
+  
+  // Back button in connection detail view
+  if (backButton) {
+    backButton.addEventListener('click', () => {
+      connectionDetailView.style.display = 'none';
+      connectionsGrid.style.display = 'block';
+    });
+  }
 });
