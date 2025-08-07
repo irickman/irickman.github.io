@@ -39,7 +39,40 @@
         <!-- Connections Subtab Content -->
         <div class="subtab-content active" id="connections-content">
           <h2>Data Connections</h2>
-          <button class="add-source-btn">Add data source</button>
+          <div class="add-source-container">
+            <button class="add-source-btn">Add data source <i class="fas fa-chevron-down"></i></button>
+            <div class="add-source-dropdown" style="display: none;">
+              <div class="dropdown-item" data-connector="snowflake">
+                <i class="fab fa-snowflake"></i>
+                <span>Snowflake</span>
+              </div>
+              <div class="dropdown-item" data-connector="aws">
+                <i class="fab fa-aws"></i>
+                <span>AWS S3</span>
+              </div>
+              <div class="dropdown-item" data-connector="bigquery">
+                <i class="fab fa-google"></i>
+                <span>Google BigQuery</span>
+              </div>
+              <div class="dropdown-item" data-connector="azure">
+                <i class="fab fa-microsoft"></i>
+                <span>Azure Blob</span>
+              </div>
+              <div class="dropdown-item" data-connector="sftp">
+                <i class="fas fa-server"></i>
+                <span>SFTP</span>
+              </div>
+              <div class="dropdown-item" data-connector="databricks">
+                <i class="fas fa-laptop-code"></i>
+                <span>Databricks</span>
+              </div>
+              <div class="dropdown-divider"></div>
+              <div class="dropdown-item" data-connector="other">
+                <i class="fas fa-ellipsis-h"></i>
+                <span>Other Connectors...</span>
+              </div>
+            </div>
+          </div>
           
           <div class="connections-grid">
             <!-- Grid Header -->
@@ -419,6 +452,351 @@
       </div>
       <div class="modal-body">
         <div class="loading-spinner"></div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Database Connection Credential Modal -->
+  <div class="modal" id="db-credential-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Connect to <span class="connector-name">Database</span></h2>
+        <span class="close-modal">&times;</span>
+      </div>
+      <div class="modal-body">
+        <!-- Step 1: Credentials -->
+        <div class="credential-step active" data-step="credentials">
+          <h3>Enter Connection Credentials</h3>
+          <div class="credential-form">
+            <!-- Common fields -->
+            <div class="form-group">
+              <label for="connection-name">Connection Name</label>
+              <input type="text" id="connection-name" placeholder="My Connection">
+            </div>
+            
+            <!-- Snowflake specific fields -->
+            <div class="connector-fields" id="snowflake-fields">
+              <div class="form-group">
+                <label for="snowflake-account">Account</label>
+                <input type="text" id="snowflake-account" placeholder="your-account.snowflakecomputing.com">
+              </div>
+              <div class="form-group">
+                <label for="snowflake-username">Username</label>
+                <input type="text" id="snowflake-username" placeholder="username">
+              </div>
+              <div class="form-group">
+                <label for="snowflake-password">Password</label>
+                <input type="password" id="snowflake-password" placeholder="••••••••">
+              </div>
+              <div class="form-group">
+                <label for="snowflake-warehouse">Warehouse</label>
+                <input type="text" id="snowflake-warehouse" placeholder="COMPUTE_WH">
+              </div>
+              <div class="form-group">
+                <label for="snowflake-database">Database</label>
+                <input type="text" id="snowflake-database" placeholder="MY_DATABASE">
+              </div>
+            </div>
+            
+            <!-- BigQuery specific fields -->
+            <div class="connector-fields" id="bigquery-fields" style="display: none;">
+              <div class="form-group">
+                <label for="bigquery-project">Project ID</label>
+                <input type="text" id="bigquery-project" placeholder="your-project-id">
+              </div>
+              <div class="form-group">
+                <label>Service Account Key</label>
+                <div class="file-upload">
+                  <button class="upload-btn">Upload JSON Key File</button>
+                  <span class="file-name">No file selected</span>
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="bigquery-dataset">Dataset</label>
+                <input type="text" id="bigquery-dataset" placeholder="your_dataset">
+              </div>
+            </div>
+            
+            <!-- Databricks specific fields -->
+            <div class="connector-fields" id="databricks-fields" style="display: none;">
+              <div class="form-group">
+                <label for="databricks-host">Host</label>
+                <input type="text" id="databricks-host" placeholder="dbc-abc123def-ghi.cloud.databricks.com">
+              </div>
+              <div class="form-group">
+                <label for="databricks-token">Access Token</label>
+                <input type="password" id="databricks-token" placeholder="dapi0123456789abcdef">
+              </div>
+              <div class="form-group">
+                <label for="databricks-catalog">Catalog</label>
+                <input type="text" id="databricks-catalog" placeholder="my_catalog">
+              </div>
+              <div class="form-group">
+                <label for="databricks-schema">Schema</label>
+                <input type="text" id="databricks-schema" placeholder="default">
+              </div>
+            </div>
+            
+            <div class="form-actions">
+              <button class="secondary-button cancel-btn">Cancel</button>
+              <button class="primary-button next-btn" data-next="tables">Test Connection</button>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Step 2: Table Selection -->
+        <div class="credential-step" data-step="tables" style="display: none;">
+          <h3>Select Tables</h3>
+          <div class="search-container">
+            <input type="text" placeholder="Search tables..." id="credential-table-search">
+          </div>
+          
+          <div class="tables-selection">
+            <div class="table-checkboxes">
+              <!-- Tables will be populated dynamically -->
+              <div class="table-checkbox-item">
+                <input type="checkbox" id="table-1">
+                <label for="table-1">customers</label>
+                <span class="schema-name">public</span>
+              </div>
+              <div class="table-checkbox-item">
+                <input type="checkbox" id="table-2">
+                <label for="table-2">orders</label>
+                <span class="schema-name">sales</span>
+              </div>
+              <div class="table-checkbox-item">
+                <input type="checkbox" id="table-3">
+                <label for="table-3">products</label>
+                <span class="schema-name">inventory</span>
+              </div>
+              <div class="table-checkbox-item">
+                <input type="checkbox" id="table-4">
+                <label for="table-4">users</label>
+                <span class="schema-name">auth</span>
+              </div>
+              <div class="table-checkbox-item">
+                <input type="checkbox" id="table-5">
+                <label for="table-5">transactions</label>
+                <span class="schema-name">finance</span>
+              </div>
+              <div class="table-checkbox-item">
+                <input type="checkbox" id="table-6">
+                <label for="table-6">visits</label>
+                <span class="schema-name">analytics</span>
+              </div>
+            </div>
+          </div>
+          
+          <div class="form-actions">
+            <button class="secondary-button back-btn" data-back="credentials">Back</button>
+            <button class="primary-button finish-btn">Connect Selected Tables</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- File Connection Modal -->
+  <div class="modal" id="file-credential-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Connect to <span class="connector-name">Storage</span></h2>
+        <span class="close-modal">&times;</span>
+      </div>
+      <div class="modal-body">
+        <!-- Step 1: Credentials -->
+        <div class="credential-step active" data-step="credentials">
+          <h3>Enter Connection Credentials</h3>
+          <div class="credential-form">
+            <!-- Common fields -->
+            <div class="form-group">
+              <label for="file-connection-name">Connection Name</label>
+              <input type="text" id="file-connection-name" placeholder="My Storage Connection">
+            </div>
+            
+            <!-- S3 specific fields -->
+            <div class="connector-fields" id="aws-fields">
+              <div class="form-group">
+                <label for="s3-access-key">Access Key ID</label>
+                <input type="text" id="s3-access-key" placeholder="AKIAIOSFODNN7EXAMPLE">
+              </div>
+              <div class="form-group">
+                <label for="s3-secret-key">Secret Access Key</label>
+                <input type="password" id="s3-secret-key" placeholder="••••••••">
+              </div>
+              <div class="form-group">
+                <label for="s3-bucket">Bucket Name</label>
+                <input type="text" id="s3-bucket" placeholder="my-data-bucket">
+              </div>
+              <div class="form-group">
+                <label for="s3-region">Region</label>
+                <select id="s3-region">
+                  <option value="us-east-1">US East (N. Virginia)</option>
+                  <option value="us-east-2">US East (Ohio)</option>
+                  <option value="us-west-1">US West (N. California)</option>
+                  <option value="us-west-2">US West (Oregon)</option>
+                  <option value="eu-west-1">EU (Ireland)</option>
+                </select>
+              </div>
+            </div>
+            
+            <!-- Azure Blob specific fields -->
+            <div class="connector-fields" id="azure-fields" style="display: none;">
+              <div class="form-group">
+                <label for="azure-account">Storage Account Name</label>
+                <input type="text" id="azure-account" placeholder="mystorageaccount">
+              </div>
+              <div class="form-group">
+                <label for="azure-key">Access Key</label>
+                <input type="password" id="azure-key" placeholder="••••••••">
+              </div>
+              <div class="form-group">
+                <label for="azure-container">Container</label>
+                <input type="text" id="azure-container" placeholder="mycontainer">
+              </div>
+            </div>
+            
+            <!-- SFTP specific fields -->
+            <div class="connector-fields" id="sftp-fields" style="display: none;">
+              <div class="form-group">
+                <label for="sftp-host">Host</label>
+                <input type="text" id="sftp-host" placeholder="sftp.example.com">
+              </div>
+              <div class="form-group">
+                <label for="sftp-port">Port</label>
+                <input type="text" id="sftp-port" placeholder="22" value="22">
+              </div>
+              <div class="form-group">
+                <label for="sftp-username">Username</label>
+                <input type="text" id="sftp-username" placeholder="username">
+              </div>
+              <div class="form-group">
+                <label>Authentication</label>
+                <div class="radio-group">
+                  <div class="radio-option">
+                    <input type="radio" id="sftp-auth-password" name="sftp-auth" value="password" checked>
+                    <label for="sftp-auth-password">Password</label>
+                  </div>
+                  <div class="radio-option">
+                    <input type="radio" id="sftp-auth-key" name="sftp-auth" value="key">
+                    <label for="sftp-auth-key">SSH Key</label>
+                  </div>
+                </div>
+              </div>
+              <div class="form-group" id="sftp-password-field">
+                <label for="sftp-password">Password</label>
+                <input type="password" id="sftp-password" placeholder="••••••••">
+              </div>
+              <div class="form-group" id="sftp-key-field" style="display: none;">
+                <label>SSH Private Key</label>
+                <div class="file-upload">
+                  <button class="upload-btn">Upload SSH Key</button>
+                  <span class="file-name">No file selected</span>
+                </div>
+              </div>
+            </div>
+            
+            <div class="form-actions">
+              <button class="secondary-button cancel-btn">Cancel</button>
+              <button class="primary-button next-btn" data-next="file-browser">Test Connection</button>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Step 2: File Browser -->
+        <div class="credential-step" data-step="file-browser" style="display: none;">
+          <h3>Select a Sample File</h3>
+          <div class="file-browser">
+            <div class="file-browser-header">
+              <div class="current-path">
+                <span class="path-segment">/</span>
+                <span class="path-segment">exports</span>
+                <span class="path-segment">daily</span>
+              </div>
+              <div class="search-container">
+                <input type="text" placeholder="Search files..." id="file-search">
+              </div>
+            </div>
+            <div class="file-list">
+              <div class="file-item directory">
+                <i class="fas fa-folder"></i>
+                <span class="file-name">archive</span>
+              </div>
+              <div class="file-item directory">
+                <i class="fas fa-folder"></i>
+                <span class="file-name">processed</span>
+              </div>
+              <div class="file-item file csv">
+                <i class="fas fa-file-csv"></i>
+                <span class="file-name">customer_data_20240805.csv</span>
+                <span class="file-size">14.2 MB</span>
+              </div>
+              <div class="file-item file csv">
+                <i class="fas fa-file-csv"></i>
+                <span class="file-name">customer_data_20240804.csv</span>
+                <span class="file-size">13.9 MB</span>
+              </div>
+              <div class="file-item file csv">
+                <i class="fas fa-file-csv"></i>
+                <span class="file-name">customer_data_20240803.csv</span>
+                <span class="file-size">14.0 MB</span>
+              </div>
+              <div class="file-item file json">
+                <i class="fas fa-file-code"></i>
+                <span class="file-name">transactions_20240805.json</span>
+                <span class="file-size">22.5 MB</span>
+              </div>
+              <div class="file-item file json">
+                <i class="fas fa-file-code"></i>
+                <span class="file-name">transactions_20240804.json</span>
+                <span class="file-size">21.8 MB</span>
+              </div>
+            </div>
+          </div>
+          
+          <div class="form-actions">
+            <button class="secondary-button back-btn" data-back="credentials">Back</button>
+            <button class="primary-button next-btn" data-next="pattern">Select File</button>
+          </div>
+        </div>
+        
+        <!-- Step 3: Pattern Detection -->
+        <div class="credential-step" data-step="pattern" style="display: none;">
+          <h3>Configure File Pattern</h3>
+          <div class="pattern-detection">
+            <div class="form-group">
+              <label for="file-pattern">File Pattern</label>
+              <input type="text" id="file-pattern" value="customer_data_YYYY_MM_DD.csv">
+              <p class="help-text">We've detected a date pattern in your file name. This will be used to identify new files.</p>
+            </div>
+            
+            <div class="form-group">
+              <label for="sync-frequency">Sync Frequency</label>
+              <select id="sync-frequency">
+                <option value="daily">Daily</option>
+                <option value="hourly">Hourly</option>
+                <option value="weekly">Weekly</option>
+                <option value="monthly">Monthly</option>
+              </select>
+            </div>
+            
+            <div class="form-group">
+              <label>Preview Matching Files</label>
+              <div class="matching-files">
+                <div class="matching-file">customer_data_2024_08_05.csv</div>
+                <div class="matching-file">customer_data_2024_08_04.csv</div>
+                <div class="matching-file">customer_data_2024_08_03.csv</div>
+                <div class="matching-file future">customer_data_2024_08_06.csv (future)</div>
+                <div class="matching-file future">customer_data_2024_08_07.csv (future)</div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="form-actions">
+            <button class="secondary-button back-btn" data-back="file-browser">Back</button>
+            <button class="primary-button finish-btn">Create Connection</button>
+          </div>
+        </div>
       </div>
     </div>
   </div>
