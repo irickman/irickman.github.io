@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Amperity - Sources and Stitch Experience</title>
+  <link rel="stylesheet" href="stitch-styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Left Navigation -->
+    <div class="left-nav">
+      <div class="logo">
+        <h2>Amperity</h2>
+      </div>
+      <div class="nav-tabs">
+        <div class="nav-tab active" data-tab="sources">
+          <i class="fas fa-database"></i>
+          <span>Sources</span>
+        </div>
+        <div class="nav-tab" data-tab="stitch">
+          <i class="fas fa-link"></i>
+          <span>Stitch</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Content Area -->
+    <div class="main-content">
+      <!-- Sources Tab Content -->
+      <div class="tab-content active" id="sources-content">
+        <div class="sub-tabs">
+          <div class="sub-tab active" data-subtab="connections">Connections</div>
+          <div class="sub-tab" data-subtab="events">Events</div>
+          <div class="sub-tab" data-subtab="advanced">Advanced</div>
+        </div>
+        
+        <!-- Connections Subtab Content -->
+        <div class="subtab-content active" id="connections-content">
+          <h2>Data Connections</h2>
+          <button class="add-source-btn">Add data source</button>
+          
+          <div class="connections-list">
+            <div class="connection-item">
+              <i class="fab fa-snowflake"></i>
+              <div class="connection-info">
+                <h3>Snowflake</h3>
+                <p>Last updated: 2 days ago</p>
+              </div>
+            </div>
+            <div class="connection-item">
+              <i class="fab fa-aws"></i>
+              <div class="connection-info">
+                <h3>AWS S3</h3>
+                <p>Last updated: 1 week ago</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Events Subtab Content -->
+        <div class="subtab-content" id="events-content">
+          <!-- Will be populated by JavaScript -->
+        </div>
+        
+        <!-- Advanced Subtab Content -->
+        <div class="subtab-content" id="advanced-content">
+          <h2>Advanced Options</h2>
+          <div class="dropdown-container">
+            <label for="legacy-objects">Select Legacy Object:</label>
+            <select id="legacy-objects">
+              <option value="couriers">Couriers</option>
+              <option value="feeds">Feeds</option>
+              <option value="domain-tables">Domain Tables</option>
+              <option value="custom-domain-tables">Custom Domain Tables</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stitch Tab Content -->
+      <div class="tab-content" id="stitch-content">
+        <div class="sub-tabs">
+          <div class="sub-tab active" data-subtab="configuration">Configuration</div>
+          <div class="sub-tab" data-subtab="benchmark">Benchmark</div>
+          <div class="sub-tab" data-subtab="summary">Summary</div>
+        </div>
+        
+        <!-- Configuration Subtab Content -->
+        <div class="subtab-content active" id="configuration-content">
+          <h2>Configure Stitch</h2>
+          
+          <!-- Card 1: Apply Transformations -->
+          <div class="config-card">
+            <div class="card-header">
+              <h3>1. Apply Transformations</h3>
+            </div>
+            <div class="card-content">
+              <div class="card-options">
+                <div class="option" data-option="join-tables">
+                  <i class="fas fa-table-cells"></i>
+                  <span>Join tables by key</span>
+                </div>
+                <div class="option" data-option="custom-sql">
+                  <i class="fas fa-code"></i>
+                  <span>Custom SQL</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Card 2: Select PII Tables -->
+          <div class="config-card">
+            <div class="card-header">
+              <h3>2. Select PII Tables</h3>
+            </div>
+            <div class="card-content">
+              <div class="table-selection">
+                <div class="table-item">
+                  <input type="checkbox" id="ecomm_customers" checked>
+                  <label for="ecomm_customers">ecomm_customers</label>
+                </div>
+                <div class="table-item">
+                  <input type="checkbox" id="ecomm_transactions">
+                  <label for="ecomm_transactions">ecomm_transactions</label>
+                </div>
+                <div class="table-item">
+                  <input type="checkbox" id="POS_customers" checked>
+                  <label for="POS_customers">POS_customers</label>
+                </div>
+                <div class="table-item">
+                  <input type="checkbox" id="POS_transactions">
+                  <label for="POS_transactions">POS_transactions</label>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Card 3: Choose Primary Key -->
+          <div class="config-card">
+            <div class="card-header">
+              <h3>3. Choose a Primary Key (PK)</h3>
+            </div>
+            <div class="card-content">
+              <button class="card-action-btn" data-action="choose-pk">Select Primary Key</button>
+            </div>
+          </div>
+          
+          <!-- Card 4: Tag Semantics -->
+          <div class="config-card">
+            <div class="card-header">
+              <h3>4. Tag Semantics</h3>
+            </div>
+            <div class="card-content">
+              <button class="card-action-btn" data-action="tag-semantics">Tag Semantics</button>
+            </div>
+          </div>
+          
+          <!-- Card 5: Apply Cleaning Rules -->
+          <div class="config-card">
+            <div class="card-header">
+              <h3>5. Apply Cleaning Rules</h3>
+            </div>
+            <div class="card-content">
+              <div class="cleaning-rules">
+                <div class="cleaning-rule">
+                  <i class="fas fa-broom"></i>
+                  <span>Remove/replace bad characters</span>
+                </div>
+                <div class="cleaning-rule">
+                  <i class="fas fa-scissors"></i>
+                  <span>Trim white space</span>
+                </div>
+                <div class="cleaning-rule">
+                  <i class="fas fa-font"></i>
+                  <span>Format by semantic</span>
+                </div>
+                <div class="cleaning-rule">
+                  <i class="fas fa-filter"></i>
+                  <span>Filter data by condition</span>
+                </div>
+                <div class="cleaning-rule">
+                  <i class="fas fa-exchange-alt"></i>
+                  <span>Change data type</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Card 6: Run Stitch -->
+          <div class="config-card">
+            <div class="card-header">
+              <h3>6. Run Stitch</h3>
+            </div>
+            <div class="card-content">
+              <button class="run-stitch-btn">Run Stitch</button>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Benchmark Subtab Content -->
+        <div class="subtab-content" id="benchmark-content">
+          <h2>Benchmark</h2>
+          <p>This is a placeholder for the Benchmark functionality.</p>
+        </div>
+        
+        <!-- Summary Subtab Content -->
+        <div class="subtab-content" id="summary-content">
+          <h2>Summary</h2>
+          <div class="summary-content">
+            <div class="summary-stat">
+              <h3>40% of records were de-duped</h3>
+            </div>
+            <button class="exit-btn">Exit</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Modals -->
+  <!-- Add Data Source Modal -->
+  <div class="modal" id="add-source-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Add Data Source</h2>
+        <span class="close-modal">&times;</span>
+      </div>
+      <div class="modal-body">
+        <h3>Direct Connections</h3>
+        <div class="connector-grid">
+          <div class="connector-item">
+            <i class="fab fa-snowflake"></i>
+            <span>Snowflake</span>
+          </div>
+          <div class="connector-item">
+            <i class="fab fa-aws"></i>
+            <span>AWS S3</span>
+          </div>
+          <div class="connector-item">
+            <i class="fab fa-google"></i>
+            <span>Google BigQuery</span>
+          </div>
+          <div class="connector-item">
+            <i class="fab fa-microsoft"></i>
+            <span>Azure Blob</span>
+          </div>
+          <div class="connector-item">
+            <i class="fas fa-server"></i>
+            <span>SFTP</span>
+          </div>
+          <div class="connector-item">
+            <i class="fas fa-laptop-code"></i>
+            <span>Databricks</span>
+          </div>
+        </div>
+        
+        <h3>Other Connectors</h3>
+        <div class="connector-grid">
+          <div class="connector-item">
+            <i class="fas fa-shopping-cart"></i>
+            <span>Shopify</span>
+          </div>
+          <div class="connector-item">
+            <i class="fas fa-envelope"></i>
+            <span>Listrak</span>
+          </div>
+          <div class="connector-item">
+            <i class="fas fa-comment"></i>
+            <span>Attentive</span>
+          </div>
+          <div class="connector-item">
+            <i class="fas fa-mail-bulk"></i>
+            <span>Klayvio</span>
+          </div>
+          <div class="connector-item">
+            <i class="fas fa-ellipsis-h"></i>
+            <span>More...</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Events Modal -->
+  <div class="modal" id="events-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Add event experience</h2>
+        <span class="close-modal">&times;</span>
+      </div>
+      <div class="modal-body">
+        <p>This is a placeholder for the future events management experience.</p>
+      </div>
+    </div>
+  </div>
+  
+  <!-- PK Selection Modal -->
+  <div class="modal" id="pk-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Using existing PK selection experience</h2>
+        <span class="close-modal">&times;</span>
+      </div>
+      <div class="modal-body">
+        <p>This is a placeholder for the primary key selection experience.</p>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Tag Semantics Modal -->
+  <div class="modal" id="semantics-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Using existing semantic tagging experience</h2>
+        <span class="close-modal">&times;</span>
+      </div>
+      <div class="modal-body">
+        <p>This is a placeholder for the semantic tagging experience.</p>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Running Stitch Modal -->
+  <div class="modal" id="running-stitch-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Stitch is running</h2>
+      </div>
+      <div class="modal-body">
+        <div class="loading-spinner"></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="stitch-script.js"></script>
+</body>
+</html>
