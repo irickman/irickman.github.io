@@ -13,6 +13,7 @@ document.addEventListener('DOMContentLoaded', function() {
   const runningStitchModal = document.getElementById('running-stitch-modal');
   const databaseTablesModal = document.getElementById('database-tables-modal');
   const fileConfigModal = document.getElementById('file-config-modal');
+  const scheduleWorkflowModal = document.getElementById('schedule-workflow-modal');
   const closeButtons = document.querySelectorAll('.close-modal');
 
   // Buttons and interactive elements
@@ -29,6 +30,11 @@ document.addEventListener('DOMContentLoaded', function() {
   const gridRows = document.querySelectorAll('.grid-row');
   const connectionDetailView = document.querySelector('.connection-detail-view');
   const backButton = document.querySelector('.back-button');
+  const scheduleWorkflowBtn = document.querySelector('.schedule-workflow-btn');
+  const scheduleWorkflowForm = document.getElementById('schedule-workflow-form');
+  const viewDetailsButtons = document.querySelectorAll('.view-details-btn');
+  const editScheduleButtons = document.querySelectorAll('.edit-schedule-btn');
+  const deleteScheduleButtons = document.querySelectorAll('.delete-schedule-btn');
 
   // Main tab navigation
   navTabs.forEach(tab => {
@@ -632,6 +638,77 @@ document.addEventListener('DOMContentLoaded', function() {
     backButton.addEventListener('click', () => {
       connectionDetailView.style.display = 'none';
       connectionsGrid.style.display = 'block';
+    });
+  }
+  
+  // Schedule Workflow button
+  if (scheduleWorkflowBtn) {
+    scheduleWorkflowBtn.addEventListener('click', () => {
+      showModal(scheduleWorkflowModal);
+    });
+  }
+
+  // Schedule Workflow Form Submission
+  if (scheduleWorkflowForm) {
+    scheduleWorkflowForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      
+      const workflowName = document.getElementById('workflow-name').value;
+      const workflowType = document.getElementById('workflow-type').value;
+      const cronExpression = document.getElementById('cron-expression').value;
+      
+      // Here you would typically send this data to the server
+      // For this prototype, we'll just display a success message and refresh the Configure tab
+      alert(`Workflow "${workflowName}" scheduled successfully with cron: ${cronExpression}`);
+      hideModal(scheduleWorkflowModal);
+      
+      // Reset form
+      scheduleWorkflowForm.reset();
+      
+      // Switch to Configure tab to show the new scheduled workflow
+      const configureTab = document.querySelector('[data-subtab="configure"]');
+      if (configureTab) {
+        configureTab.click();
+      }
+    });
+  }
+
+  // View Details Button Event Handlers
+  if (viewDetailsButtons) {
+    viewDetailsButtons.forEach(button => {
+      button.addEventListener('click', function() {
+        const workflowName = this.closest('.workflow-item').querySelector('h3').textContent;
+        alert(`Viewing details for workflow: ${workflowName}`);
+        // In a real implementation, you would navigate to a details page or show a detailed modal
+      });
+    });
+  }
+
+  // Edit Schedule Button Event Handlers
+  if (editScheduleButtons) {
+    editScheduleButtons.forEach(button => {
+      button.addEventListener('click', function() {
+        const workflowItem = this.closest('.workflow-item');
+        const workflowName = workflowItem.querySelector('h3').textContent;
+        const cronExpression = workflowItem.querySelector('.schedule-badge').textContent;
+        
+        // In a real implementation, you would populate a form with the current values
+        alert(`Editing schedule for workflow: ${workflowName} with cron: ${cronExpression}`);
+        // You could show the schedule workflow modal pre-populated with the current values
+      });
+    });
+  }
+
+  // Delete Schedule Button Event Handlers
+  if (deleteScheduleButtons) {
+    deleteScheduleButtons.forEach(button => {
+      button.addEventListener('click', function() {
+        const workflowName = this.closest('.workflow-item').querySelector('h3').textContent;
+        if (confirm(`Are you sure you want to delete the schedule for ${workflowName}?`)) {
+          // In a real implementation, you would send a delete request to the server
+          this.closest('.workflow-item').remove();
+        }
+      });
     });
   }
 });

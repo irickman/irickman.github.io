@@ -23,6 +23,10 @@
           <i class="fas fa-link"></i>
           <span>Stitch</span>
         </div>
+        <div class="nav-tab" data-tab="workflows">
+          <i class="fas fa-tasks"></i>
+          <span>Workflows</span>
+        </div>
       </div>
     </div>
 
@@ -335,6 +339,82 @@
               <h3>40% of records were de-duped</h3>
             </div>
             <button class="exit-btn">Exit</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Workflows Tab Content -->
+      <div class="tab-content" id="workflows-content">
+        <div class="workflows-header">
+          <h2>Workflows</h2>
+          <button class="schedule-workflow-btn">Schedule New Workflow</button>
+        </div>
+        <div class="sub-tabs">
+          <div class="sub-tab active" data-subtab="run-history">Run History</div>
+          <div class="sub-tab" data-subtab="configure">Configure</div>
+        </div>
+        
+        <!-- Run History Subtab Content -->
+        <div class="subtab-content active" id="run-history-content">
+          <div class="workflows-list">
+            <div class="workflow-item">
+              <div class="workflow-info">
+                <h3>Customer Identity Resolution</h3>
+                <p>Last run: 2 days ago</p>
+                <span class="status success">Completed</span>
+              </div>
+              <div class="workflow-actions">
+                <button class="view-details-btn">View Details</button>
+              </div>
+            </div>
+            <div class="workflow-item">
+              <div class="workflow-info">
+                <h3>Product Catalog Update</h3>
+                <p>Last run: 5 days ago</p>
+                <span class="status success">Completed</span>
+              </div>
+              <div class="workflow-actions">
+                <button class="view-details-btn">View Details</button>
+              </div>
+            </div>
+            <div class="workflow-item">
+              <div class="workflow-info">
+                <h3>Transaction Data Processing</h3>
+                <p>Last run: 1 week ago</p>
+                <span class="status error">Failed</span>
+              </div>
+              <div class="workflow-actions">
+                <button class="view-details-btn">View Details</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Configure Subtab Content -->
+        <div class="subtab-content" id="configure-content">
+          <div class="workflows-list">
+            <div class="workflow-item">
+              <div class="workflow-info">
+                <h3>Weekly Customer Identity Resolution</h3>
+                <p>Schedule: Every Sunday at 2:00 AM</p>
+                <span class="schedule-badge">0 0 2 * * 0</span>
+              </div>
+              <div class="workflow-actions">
+                <button class="edit-schedule-btn">Edit</button>
+                <button class="delete-schedule-btn">Delete</button>
+              </div>
+            </div>
+            <div class="workflow-item">
+              <div class="workflow-info">
+                <h3>Weekly Product Catalog Update</h3>
+                <p>Schedule: Every Monday at 1:00 AM</p>
+                <span class="schedule-badge">0 0 1 * * 1</span>
+              </div>
+              <div class="workflow-actions">
+                <button class="edit-schedule-btn">Edit</button>
+                <button class="delete-schedule-btn">Delete</button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -948,6 +1028,62 @@
     </div>
   </div>
   
+  <!-- Schedule Workflow Modal -->
+  <div class="modal" id="schedule-workflow-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Schedule New Workflow</h2>
+        <span class="close-modal">&times;</span>
+      </div>
+      <div class="modal-body">
+        <form id="schedule-workflow-form">
+          <div class="form-group">
+            <label for="workflow-name">Workflow Name</label>
+            <input type="text" id="workflow-name" required>
+          </div>
+
+          <div class="form-group">
+            <label for="workflow-type">Workflow Type</label>
+            <select id="workflow-type" required>
+              <option value="">Select workflow type...</option>
+              <option value="identity-resolution">Customer Identity Resolution</option>
+              <option value="catalog-update">Product Catalog Update</option>
+              <option value="transaction-processing">Transaction Data Processing</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="cron-expression">Schedule (Cron Expression)</label>
+            <input type="text" id="cron-expression" placeholder="0 0 * * *" required>
+            <div class="cron-guidance">
+              <h4>Cron Expression Guide</h4>
+              <div class="cron-format">
+                <code>* * * * *</code>
+                <div class="cron-legend">
+                  <span>minute (0-59)</span>
+                  <span>hour (0-23)</span>
+                  <span>day of month (1-31)</span>
+                  <span>month (1-12)</span>
+                  <span>day of week (0-6) (Sunday=0)</span>
+                </div>
+              </div>
+              <h5>Common Examples:</h5>
+              <ul class="cron-examples">
+                <li><code>0 0 * * 0</code> - Every Sunday at midnight</li>
+                <li><code>0 0 * * 1-5</code> - Every weekday at midnight</li>
+                <li><code>0 0 1 * *</code> - First day of every month at midnight</li>
+                <li><code>0 */6 * * *</code> - Every 6 hours</li>
+                <li><code>0 8 * * 1-5</code> - Every weekday at 8:00 AM</li>
+              </ul>
+            </div>
+          </div>
+
+          <button type="submit" class="submit-workflow-btn">Schedule Workflow</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
   <!-- File Connection Config Modal -->
   <div class="modal" id="file-config-modal">
     <div class="modal-content">

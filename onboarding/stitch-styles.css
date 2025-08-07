@@ -594,6 +594,163 @@ button {
   100% { transform: rotate(360deg); }
 }
 
+/* Workflows Styles */
+.workflows-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.schedule-workflow-btn {
+  background-color: var(--primary-color);
+  color: var(--light-text);
+  padding: 10px 20px;
+  font-size: 16px;
+}
+
+.workflows-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin-top: 20px;
+}
+
+.workflow-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: var(--card-background);
+  padding: 20px;
+  border-radius: 6px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.workflow-info h3 {
+  font-weight: 500;
+  margin-bottom: 5px;
+}
+
+.workflow-info p {
+  color: #777;
+  font-size: 14px;
+  margin-bottom: 8px;
+}
+
+.status {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.status.success {
+  background-color: #e6f7ee;
+  color: var(--success-color);
+}
+
+.status.error {
+  background-color: #ffeaea;
+  color: var(--error-color);
+}
+
+.workflow-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.view-details-btn, .edit-schedule-btn {
+  background-color: #f0f0f0;
+  color: var(--text-color);
+}
+
+.delete-schedule-btn {
+  background-color: #ffeaea;
+  color: var(--error-color);
+}
+
+.schedule-badge {
+  display: inline-block;
+  background-color: #f0f0f0;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 13px;
+  font-family: monospace;
+}
+
+/* Schedule Workflow Form Styles */
+.submit-workflow-btn {
+  background-color: var(--primary-color);
+  color: var(--light-text);
+  padding: 10px 20px;
+  font-size: 16px;
+  width: 100%;
+  margin-top: 10px;
+}
+
+.cron-guidance {
+  background-color: #f9f9f9;
+  border-radius: 6px;
+  padding: 15px;
+  margin-top: 10px;
+}
+
+.cron-guidance h4 {
+  margin-top: 0;
+  margin-bottom: 10px;
+  color: var(--secondary-color);
+}
+
+.cron-guidance h5 {
+  margin-top: 15px;
+  margin-bottom: 10px;
+}
+
+.cron-format {
+  background-color: #f0f0f0;
+  padding: 12px 15px;
+  border-radius: 4px;
+  margin-bottom: 15px;
+}
+
+.cron-format code {
+  font-family: monospace;
+  font-size: 18px;
+  font-weight: bold;
+  display: block;
+  margin-bottom: 8px;
+  text-align: center;
+}
+
+.cron-legend {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  text-align: center;
+}
+
+.cron-legend span {
+  flex: 1;
+}
+
+.cron-examples {
+  list-style-type: none;
+  padding-left: 0;
+}
+
+.cron-examples li {
+  margin-bottom: 8px;
+}
+
+.cron-examples code {
+  font-family: monospace;
+  background-color: #f0f0f0;
+  padding: 2px 6px;
+  border-radius: 3px;
+  margin-right: 8px;
+}
+
 /* Responsive Design */
 @media (max-width: 992px) {
   .left-nav {
